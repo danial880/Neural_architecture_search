@@ -513,10 +513,10 @@ def get_desired_dataset(args):
 
   if args.dataset == 'flower102':
 
-    train_data = torchvision.datasets.FLOWERS102(root='./data', split='train',
+    train_data = torchvision.datasets.Flowers102(root='./data', split='train',
                                         download=True, transform=train_transform)
    
-    test_data = torchvision.datasets.FLOWERS102(root='./data', split='val',
+    test_data = torchvision.datasets.Flowers102(root='./data', split='val',
                                            download=True, transform=test_transform)
 
     total_classes =["pink primrose", "hard-leaved pocket orchid", "canterbury bells", "sweet pea", "english marigold", 
