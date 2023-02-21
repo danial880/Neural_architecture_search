@@ -13,15 +13,17 @@ import torchvision.datasets as dset
 from torch.utils.data.sampler import SubsetRandomSampler
 import torch.backends.cudnn as cudnn
 import torchvision
+from torchsummary import summary
 
 from torch.autograd import Variable
-from NetworkMix import NetworkMix_ImageNet
+from NetworkMix import NetworkMix_ImageNet, NetworkMix_arch
 import torchvision.transforms as transforms
 from Subsets import *
-
 parser = argparse.ArgumentParser("Neural Architecture search")
 
 parser.add_argument('--dataset', type=str, default='cifar10', help='dataset name')
+parser.add_argument('--data_dir', type=str, default='./data', help='dataset path')
+parser.add_argument('--input_shape', '--list', type=int, nargs='*',default=[224,224], help='dataset shape')
 
 parser.add_argument('--valid_size', type=float, default=0, help='validation data size')
 parser.add_argument('--batch_size', type=int, default=64, help='batch size')
@@ -50,15 +52,16 @@ parser.add_argument('--min_depth', type=int, default=5, help='minimum number of 
 parser.add_argument('--max_depth', type=int, default=15, help='maximum number of init layers in search')
 
 args = parser.parse_args()
+def setup_start(args):
 
-args.save = 'Search-{}-{}'.format(args.save, time.strftime("%Y%m%d-%H%M%S"))
-utils.create_exp_dir(args.save, scripts_to_save=glob.glob('*.py'))
+  args.save = 'Search-{}-{}'.format(args.save, time.strftime("%Y%m%d-%H%M%S"))
+  utils.create_exp_dir(args.save, scripts_to_save=glob.glob('*.py'))
 
-log_format = '%(asctime)s %(message)s'
-logging.basicConfig(stream=sys.stdout, level=logging.INFO, format=log_format, datefmt='%m/%d %I:%M:%S %p')
-fh = logging.FileHandler(os.path.join(args.save, 'Searchlog.txt'))
-fh.setFormatter(logging.Formatter(log_format))
-logging.getLogger().addHandler(fh)
+  log_format = '%(asctime)s %(message)s'
+  logging.basicConfig(stream=sys.stdout, level=logging.INFO, format=log_format, datefmt='%m/%d %I:%M:%S %p')
+  fh = logging.FileHandler(os.path.join(args.save, 'Searchlog.txt'))
+  fh.setFormatter(logging.Formatter(log_format))
+  logging.getLogger().addHandler(fh)
 
 
 def main():
@@ -113,7 +116,9 @@ def main():
   logging.info('#############################################################################')
   logging.info('')
 
-  model = NetworkMix_ImageNet(f_channels, ImageNet_CLASSES, f_layers, curr_arch_ops, curr_arch_kernel)
+  # model = NetworkMix_ImageNet(f_channels, ImageNet_CLASSES, f_layers, curr_arch_ops, curr_arch_kernel)
+  model = NetworkMix_arch(f_channels, ImageNet_CLASSES, f_layers, curr_arch_ops, curr_arch_kernel,args.input_shape)
+
   model = model.cuda()                                                                                                                           
 
   logging.info('FINAL DISCOVERED ARCHITECTURE DETAILS:')
@@ -148,7 +153,9 @@ def search_depth_and_width(args, classes, train_queue, valid_queue, test_queue,c
 
   logging.info('RUNNING DEPTH SEARCH FIRST...')
 
-  model = NetworkMix_ImageNet(channels, ImageNet_CLASSES, layers, curr_arch_ops, curr_arch_kernel)
+  # model = NetworkMix_ImageNet(channels, ImageNet_CLASSES, layers, curr_arch_ops, curr_arch_kernel)
+  model = NetworkMix_arch(channels, ImageNet_CLASSES, layers, curr_arch_ops, curr_arch_kernel,args.input_shape)
+
   model = model.cuda()
   
   logging.info('MODEL DETAILS')
@@ -172,7 +179,8 @@ def search_depth_and_width(args, classes, train_queue, valid_queue, test_queue,c
       layers += 1
       next_arch_ops = np.zeros((layers,), dtype=int)
       next_arch_kernel = 3*np.ones((layers,), dtype=int)
-      model = NetworkMix_ImageNet(channels, ImageNet_CLASSES, layers, next_arch_ops, next_arch_kernel)
+      # model = NetworkMix_ImageNet(channels, ImageNet_CLASSES, layers, next_arch_ops, next_arch_kernel)
+      model = NetworkMix_arch(channels, ImageNet_CLASSES, layers, next_arch_ops, next_arch_kernel,args.input_shape) 
       model = model.cuda()
       logging.info('#############################################################################')
       logging.info('Moving to Next Candidate Architecture...')
@@ -213,7 +221,8 @@ def search_depth_and_width(args, classes, train_queue, valid_queue, test_queue,c
     # prepare next candidate architecture.
     channels = channels - width_resolution
     # Although these do not change.
-    model = NetworkMix_ImageNet(channels, ImageNet_CLASSES, f_layers, curr_arch_ops, curr_arch_kernel)
+    # model = NetworkMix_ImageNet(channels, ImageNet_CLASSES, f_layers, curr_arch_ops, curr_arch_kernel)
+    model = NetworkMix_arch(channels, ImageNet_CLASSES, f_layers, curr_arch_ops, curr_arch_kernel,args.input_shape)
     model = model.cuda()
     logging.info('Moving to Next Candidate Architecture...')
     logging.info('MODEL DETAILS')
@@ -259,7 +268,8 @@ def search_operations(args, classes, train_queue, valid_queue, test_queue, model
  
     next_arch_ops[i] = 1
 
-    model = NetworkMix_ImageNet(channels, ImageNet_CLASSES, layers, next_arch_ops, next_arch_kernel)
+    # model = NetworkMix_ImageNet(channels, ImageNet_CLASSES, layers, next_arch_ops, next_arch_kernel)
+    model = NetworkMix_arch(channels, ImageNet_CLASSES, layers, next_arch_ops, next_arch_kernel,args.input_shape)
     model = model.cuda()
   
     logging.info('NEXT MODEL DETAILS')
@@ -311,7 +321,8 @@ def search_kernels(args, classes, train_queue, valid_queue, test_queue, model_in
 
       next_arch_kernel[i] = k
  
-      model = NetworkMix_ImageNet(channels, ImageNet_CLASSES, layers, next_arch_ops, next_arch_kernel)
+      # model = NetworkMix_ImageNet(channels, ImageNet_CLASSES, layers, next_arch_ops, next_arch_kernel)
+      model =  NetworkMix_arch(channels, ImageNet_CLASSES, layers, next_arch_ops, next_arch_kernel,args.input_shape)
       model = model.cuda()
   
       logging.info('MODEL DETAILS')
@@ -366,7 +377,9 @@ def search_ops_and_ks_simultaneous(args, classes, train_queue, valid_queue, test
         next_arch_ops[i] = o
         next_arch_kernel[i] = k
  
-        model = NetworkMix_ImageNet(channels, ImageNet_CLASSES, layers, next_arch_ops, next_arch_kernel)
+        # model = NetworkMix_ImageNet(channels, ImageNet_CLASSES, layers, next_arch_ops, next_arch_kernel)
+        model = NetworkMix_arch(channels, ImageNet_CLASSES, layers, next_arch_ops, next_arch_kernel,args.input_shape)
+
         model = model.cuda()
   
         logging.info('MODEL DETAILS')
@@ -418,125 +431,8 @@ def search_operations_and_kernels(args, classes, train_queue, valid_queue, test_
 
 def get_desired_dataset(args):
 
-  # traindir = os.path.join(args.data, 'train')
-  # validdir = os.path.join(args.data, 'val')
-
-  normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-
-  train_transform= transforms.Compose([
-            transforms.Resize((224,224)),
-            transforms.RandomResizedCrop(224),
-            transforms.RandomHorizontalFlip(),
-            transforms.ColorJitter(
-              brightness=0.4,
-              contrast=0.4,
-              saturation=0.4,
-              hue=0.2),
-            transforms.ToTensor(),
-            normalize,
-          ])
-
-  test_transform = transforms.Compose([
-      transforms.Resize((224,224)),
-      transforms.CenterCrop(224),
-      transforms.ToTensor(),
-      normalize,
-    ])
+  train_data, test_data, total_classes = utils.data_load_transforms(args)
   
-  if args.dataset == 'cifar10':
-    train_data = torchvision.datasets.CIFAR10(root='./data', train=True,
-                                        download=True, transform=train_transform)
-  
-    test_data = torchvision.datasets.CIFAR10(root='./data', train=False,
-                                           download=True, transform=test_transform)
-    
-    total_classes = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
-   
-  if args.dataset == 'STL10':
-    train_data = torchvision.datasets.STL10(root='./data', train=True,
-                                        download=True, transform=train_transform)
-   
-    test_data = torchvision.datasets.STL10(root='./data', train=False,
-                                           download=True, transform=test_transform)
-   
-    total_classes = ['airplane','bird','car','cat','deer','dogs','horse','monkey','ship','truck']
-   
-  
-  if args.dataset == 'DTD':
-
-    train_data = torchvision.datasets.DTD(root='./data', split='train',download=True, transform=train_transform)
-   
-    test_data = torchvision.datasets.DTD(root='./data', split='val',
-                                           download=True, transform=test_transform)
-    total_classes = ['banded', 'blotchy', 'braided', 'bubbly', 'bumpy', 'chequered', 'cobwebbed', 'cracked', 'crosshatched',  
-              'crystalline', 'dotted', 'fibrous', 'flecked', 'frothy', 'gauzy', 'grid', 'grooved', 'herringbone',   
-               'interlaced', 'knitted', 'lacelike', 'lined', 'marbled', 'matted', 'meshed', 'paisley', 'patterned',  
-               'plaid', 'polka-dotted', 'porous', 'radial', 'ribbed', 'scaled', 'smeared', 'spangled', 'speckled',
-               'stippled', 'striped', 'studded', 'swirly', 'veined', 'waffled', 'woven', 'wrinkled', 'zigzagged',
-                'homogeneous', 'non-homogeneous']
-    
-  if args.dataset == 'cifar100':
-    
-    train_data = torchvision.datasets.CIFAR100(root='./data', train=True,
-                                        download=True, transform=train_transform)
-   
-    test_data = torchvision.datasets.CIFAR100(root='./data', train=False,
-                                           download=True, transform=test_transform)
-   
-    total_classes =['apple', 'aquarium_fish', 'baby', 'bear', 'beaver', 'bed', 'bee', 'beetle', 'bicycle', 'bottle', 'bowl',            
-    'boy', 'bridge', 'bus', 'butterfly', 'camel', 'can', 'castle', 'caterpillar', 'cattle', 'chair', 'chimpanzee',            
-    'clock', 'cloud', 'cockroach', 'couch', 'crab', 'crocodile', 'cup', 'dinosaur', 'dolphin', 'elephant', 'flatfish',            
-    'forest', 'fox', 'girl', 'hamster', 'house', 'kangaroo', 'keyboard', 'lamp', 'lawn_mower', 'leopard', 'lion',            
-    'lizard', 'lobster', 'man', 'maple_tree', 'motorcycle', 'mountain', 'mouse', 'mushroom', 'oak_tree', 'orange',            
-    'orchid', 'otter', 'palm_tree', 'pear', 'pickup_truck', 'pine_tree', 'plain', 'plate', 'poppy', 'porcupine',            
-    'possum', 'rabbit', 'raccoon', 'ray', 'road', 'rocket', 'rose', 'sea', 'seal', 'shark', 'shrew', 'skunk',            
-    'skyscraper', 'snail', 'snake', 'spider', 'squirrel', 'streetcar', 'sunflower', 'sweet_pepper', 'table',            
-    'tank', 'telephone', 'television', 'tiger', 'tractor', 'train', 'trout', 'tulip', 'turtle', 'wardrobe',            
-    'whale', 'willow_tree', 'wolf', 'woman', 'worm']
-
-    
-    
-  if args.dataset == 'Food101':
-    train_data = torchvision.datasets.Food101(root='./data', split='train',download=True, transform=train_transform)
-   
-    test_data = torchvision.datasets.Food101(root='./data', split='val',download=True, transform=test_transform)
-
-    total_classes = ['macarons', 'french_toast', 'lobster_bisque', 'prime_rib', 'pork_chop', 'guacamole', 'baby_back_ribs', 'mussels', 'beef_carpaccio', 'poutine',
-                    'hot_and_sour_soup', 'seaweed_salad', 'foie_gras', 'dumplings', 'peking_duck', 'takoyaki', 'bibimbap', 'falafel', 'pulled_pork_sandwich', 'lobster_roll_sandwich',
-                    'carrot_cake', 'beet_salad', 'panna_cotta', 'donuts', 'red_velvet_cake', 'grilled_cheese_sandwich', 'cannoli', 'spring_rolls', 'shrimp_and_grits',
-                    'clam_chowder','omelette', 'fried_calamari', 'caprese_salad', 'oysters', 'scallops', 'ramen', 'grilled_salmon', 'croque_madame', 'filet_mignon',
-                    'hamburger', 'spaghetti_carbonara', 'miso_soup', 'bread_pudding', 'lasagna', 'crab_cakes', 'cheesecake', 'spaghetti_bolognese', 'cup_cakes', 'creme_brulee',
-                    'waffles', 'fish_and_chips', 'paella', 'macaroni_and_cheese', 'chocolate_mousse', 'ravioli', 'chicken_curry', 'caesar_salad', 'nachos', 'tiramisu', 'frozen_yogurt',
-                    'ice_cream', 'risotto', 'club_sandwich', 'strawberry_shortcake', 'steak', 'churros', 'garlic_bread', 'baklava', 'bruschetta', 'hummus', 'chicken_wings',
-                    'greek_salad', 'tuna_tartare', 'chocolate_cake', 'gyoza', 'eggs_benedict', 'deviled_eggs', 'samosa', 'sushi', 'breakfast_burrito', 'ceviche', 'beef_tartare',
-                    'apple_pie', '.DS_Store', 'huevos_rancheros', 'beignets', 'pizza', 'edamame', 'french_onion_soup', 'hot_dog', 'tacos', 'chicken_quesadilla', 'pho', 'gnocchi',
-                    'pancakes', 'fried_rice', 'cheese_plate', 'onion_rings', 'escargots', 'sashimi', 'pad_thai', 'french_fries']
-
-  if args.dataset == 'flower102':
-
-    train_data = torchvision.datasets.Flowers102(root='./data', split='train',
-                                        download=True, transform=train_transform)
-   
-    test_data = torchvision.datasets.Flowers102(root='./data', split='val',
-                                           download=True, transform=test_transform)
-
-    total_classes =["pink primrose", "hard-leaved pocket orchid", "canterbury bells", "sweet pea", "english marigold", 
-    "tiger lily", "moon orchid", "bird of paradise", "monkshood", "globe thistle", "snapdragon",
-     "colt's foot", "king protea", "spear thistle", "yellow iris", "globe-flower", "purple coneflower", "peruvian lily",
-    "balloon flower", "giant white arum lily", "fire lily", "pincushion flower", "fritillary", "red ginger", "grape hyacinth",
-    "corn poppy", "prince of wales feathers", "stemless gentian", "artichoke", "sweet william", "carnation", "garden phlox", 
-    "love in the mist", "mexican aster", "alpine sea holly", "ruby-lipped cattleya", "cape flower", "great masterwort", 
-    "siam tulip", "lenten rose", "barbeton daisy", "daffodil", "sword lily", "poinsettia", "bolero deep blue", "wallflower", 
-    "marigold", "buttercup", "oxeye daisy", "common dandelion", "petunia", "wild pansy", "primula", "sunflower", "pelargonium", 
-    "bishop of llandaff", "gaura", "geranium", "orange dahlia", "pink-yellow dahlia", "cautleya spicata", "japanese anemone", 
-    "black-eyed susan", "silverbush", "californian poppy", "osteospermum", "spring crocus", "bearded iris", "windflower", "tree poppy", 
-    "gazania", "azalea", "water lily", "rose", "thorn apple", "morning glory", "passion flower", "lotus", "toad lily", "anthurium", 
-    "frangipani", "clematis", "hibiscus", "columbine", "desert-rose", "tree mallow", "magnolia", "cyclamen", "watercress", 
-    "canna lily", "hippeastrum", "bee balm", "ball moss", "foxglove", "bougainvillea", "camellia", "mallow", "mexican petunia", 
-    "bromelia", "blanket flower", "trumpet creeper", "blackberry lily"]
-  
-  
-
   # obtain training indices that will be used for validation
   valid_size = args.valid_size
   num_train = len(train_data)
@@ -575,7 +471,7 @@ def train_test(args, classes, model, train_queue, valid_queue, test_queue):
   criterion = criterion.cuda()
   optimizer = torch.optim.SGD(model.parameters(), args.learning_rate, momentum=args.momentum, weight_decay=args.weight_decay)
   scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, float(args.epochs))
-
+  print(model)
   best_train_acc = 0.0
   best_test_acc = 0.0
 
@@ -728,6 +624,7 @@ def classwisetest(model, classes, test_queue, criterion):
 
 if __name__ == '__main__':
   start_time = time.time()
+  setup_start(args)
   main() 
   end_time = time.time()
   duration = end_time - start_time
