@@ -16,7 +16,7 @@ import torchvision
 from torchsummary import summary
 
 from torch.autograd import Variable
-from NetworkMix import NetworkMix_ImageNet, NetworkMix_arch
+from NetworkMix import  NetworkMix_arch
 import torchvision.transforms as transforms
 from Subsets import *
 from trainer import Train
@@ -119,6 +119,7 @@ def main():
   logging.info("Model Layers %s Model Kernels %s", curr_arch_ops, curr_arch_kernel)
   logging.info("Model Parameters = %fMB", utils.count_parameters_in_MB(model))
   logging.info("Training Accuracy %f Validation Accuracy %f", curr_arch_train_acc, curr_arch_test_acc)
+  logging.info('Final model summary: %s',model)
 
 if __name__ == '__main__':
   start_time = time.time()
