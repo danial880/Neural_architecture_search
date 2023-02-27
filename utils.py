@@ -119,7 +119,7 @@ def create_exp_dir(path, scripts_to_save=None):
 
 def data_load_transforms(args):
 
-
+# Find mean and std for given dataset
   normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 
   train_transform= transforms.Compose([
