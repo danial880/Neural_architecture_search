@@ -16,7 +16,7 @@ import torchvision
 from torchsummary import summary
 
 from torch.autograd import Variable
-from NetworkMix import NetworkMix_ImageNet, NetworkMix_arch
+from NetworkMix import  NetworkMix_arch
 import torchvision.transforms as transforms
 from Subsets import *
 
