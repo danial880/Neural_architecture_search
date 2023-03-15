@@ -25,14 +25,18 @@ class Train():
 
     self.batch_size = args.batch_size
     self.valid_size = args.valid_size
-    self.classes = []
-
+    dataset_config = utils.read_hparam_yaml()
+    self.dataset = dataset_config['dataset_to_run']
+    self.classes =  dataset_config['datasets'][self.dataset]['classes']
     self.class_labels = []
+    for i in range(len(self.classes)):
+      self.class_labels.append(i)
+    
 
   def get_desired_dataset(self, args,logging):
 
     
-    train_data, test_data, total_classes = utils.data_load_transforms(args)
+    train_data, test_data = utils.data_load_transforms(args)
     # obtain training indices that will be used for validation
     
     num_train = len(train_data)
@@ -56,12 +60,7 @@ class Train():
     images, labels = next(dataiter)
     print("***** Shape of the dataset *******",images.size())
     
-    for i in range(len(total_classes)):
-      self.class_labels.append(i)
-
-    for i in np.array(self.class_labels):
-      self.classes.append(total_classes[i])
-
+   
     print('Classes under consideration: ', self.classes)
     logging.info("Classes under consideration: %s", self.classes)
 
