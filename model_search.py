@@ -14,6 +14,7 @@ from torch.utils.data.sampler import SubsetRandomSampler
 import torch.backends.cudnn as cudnn
 import torchvision
 from torchsummary import summary
+import yaml
 
 from torch.autograd import Variable
 from NetworkMix import  NetworkMix_arch
@@ -34,7 +35,13 @@ class Model():
         # We start with max width but with min depth.
         self.channels = self.max_width 
         self.layers = self.min_depth
-        self.input_shape = args.input_shape
+        dataset_config = utils.read_hparam_yaml()
+        self.dataset = dataset_config['dataset_to_run']
+
+       
+        width = dataset_config['datasets'][self.dataset]['width']
+        height = dataset_config['datasets'][self.dataset]['height']
+        self.input_shape = [width,height]
 
     def search_depth_and_width(self,args,class_labels,train_test,train):
 
@@ -220,7 +227,7 @@ class Model():
 
                 logging.info('MODEL DETAILS')
                 logging.info("Model Depth %s Model Width %s", self.layers, self.channels)
-                logging.info("Model self.layers %s Model Kernels %s", next_arch_ops, next_arch_kernel)
+                logging.info("Model layers %s Model Kernels %s", next_arch_ops, next_arch_kernel)
                 logging.info("Model Parameters = %fMB", utils.count_parameters_in_MB(model))
                 logging.info('Training Model...')
                 next_arch_train_acc, next_arch_test_acc = train_test(args, model)
@@ -321,3 +328,5 @@ class Model():
         curr_arch_ops, curr_arch_kernel, curr_arch_train_acc, curr_arch_test_acc = self.search_kernels(args,class_labels,train_test,train ,model_info)
 
         return curr_arch_ops, curr_arch_kernel, curr_arch_train_acc, curr_arch_test_acc
+
+
