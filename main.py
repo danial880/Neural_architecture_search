@@ -24,9 +24,7 @@ from model_search import Model
 
 parser = argparse.ArgumentParser("Neural Architecture search")
 
-parser.add_argument('--dataset', type=str, default='cifar10', help='dataset name')
 parser.add_argument('--data_dir', type=str, default='./data', help='dataset path')
-parser.add_argument('--input_shape', '--list', type=int, nargs='*',default=[224,224], help='dataset shape')
 
 parser.add_argument('--valid_size', type=float, default=0, help='validation data size')
 parser.add_argument('--batch_size', type=int, default=64, help='batch size')
