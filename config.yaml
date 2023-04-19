@@ -1,74 +1,153 @@
-dataset_to_run: 'DTD'
+dataset_to_run: 'CIFAR10'
 
 datasets:
   STL10:
     width: 32
     height: 32
     channels: 3
-    mean: 
-    std: 
-    classes: ['airplane','bird','car','cat','deer','dogs','horse','monkey','ship','truck']
- 
+    mean: [0.4914, 0.4822, 0.4465]
+    std: [0.2023, 0.1994, 0.2010]
+    train: ["datasets.STL10(root=args.data_dir, train=True,
+             download=True, transform=train_transform)"]
+    test: ["datasets.STL10(root=args.data_dir, train=False,
+            download=True, transform=test_transform)"]
+    classes: ['airplane','bird','car','cat','deer','dogs','horse','monkey',
+              'ship','truck']
+
+  CIFAR10:
+    width: 32
+    height: 32
+    channels: 3
+    mean: [0.49139968, 0.48215827 ,0.44653124]
+    std: [0.24703233, 0.24348505, 0.26158768]
+    train: ["datasets.CIFAR10(root=args.data_dir, train=True,
+             download=True, transform=train_transform)"]
+    test: ["datasets.CIFAR10(root=args.data_dir, train=False,
+            download=True, transform=test_transform)"]
+    classes: ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog',
+              'horse', ship, truck']
+
   DTD:
     width: 32
     height: 32
     channels: 3
     mean: [0.1913, 0.0761, 0.0831]
     std: [2.5510, 2.5276, 2.5915]
-    classes: ['banded', 'blotchy', 'braided', 'bubbly', 'bumpy', 'chequered', 'cobwebbed', 'cracked', 'crosshatched', 'crystalline', 'dotted', 'fibrous', 'flecked', 'frothy', 'gauzy', 'grid', 'grooved', 'herringbone',   
-              'interlaced', 'knitted', 'lacelike', 'lined', 'marbled', 'matted', 'meshed', 'paisley', 'patterned', 'plaid', 'polka-dotted', 'porous', 'radial', 'ribbed', 'scaled', 'smeared', 'spangled', 'speckled',
-                'stippled', 'striped', 'studded', 'swirly', 'veined', 'waffled', 'woven', 'wrinkled', 'zigzagged', 'homogeneous', 'non-homogeneous']
-    
+    train: ["datasets.Food101(root=args.data_dir, split='train', download=True,
+                             transform=train_transform)"]
+    test: ["datasets.Food101(root=args.data_dir, split='val', download=True,
+                            transform=test_transform)"]
+    classes: ['banded', 'blotchy', 'braided', 'bubbly', 'bumpy','chequered', 
+              'cobwebbed', 'cracked', 'crosshatched', 'crystalline', 'dotted',
+              'fibrous', 'flecked', 'frothy', 'gauzy', 'grid', 'grooved',
+              'herringbone', 'interlaced', 'knitted', 'lacelike', 'lined',
+              'marbled', 'matted','meshed', 'paisley', 'patterned', 'plaid',
+              'polka-dotted', 'porous', 'radial', 'ribbed', 'scaled',
+              'smeared', 'spangled', 'speckled', 'stippled', 'striped',
+              'studded', 'swirly', 'veined', 'waffled', 'woven', 'wrinkled',
+              'zigzagged','homogeneous', 'non-homogeneous']
+
   CIFAR100:
     width: 32
     height: 32
     channels: 3
-    mean: 
-    std: 
-    classes:  ['apple', 'aquarium_fish', 'baby', 'bear', 'beaver', 'bed', 'bee', 'beetle', 'bicycle', 'bottle', 'bowl',            
-        'boy', 'bridge', 'bus', 'butterfly', 'camel', 'can', 'castle', 'caterpillar', 'cattle', 'chair', 'chimpanzee',            
-        'clock', 'cloud', 'cockroach', 'couch', 'crab', 'crocodile', 'cup', 'dinosaur', 'dolphin', 'elephant', 'flatfish',            
-        'forest', 'fox', 'girl', 'hamster', 'house', 'kangaroo', 'keyboard', 'lamp', 'lawn_mower', 'leopard', 'lion',            
-        'lizard', 'lobster', 'man', 'maple_tree', 'motorcycle', 'mountain', 'mouse', 'mushroom', 'oak_tree', 'orange',            
-        'orchid', 'otter', 'palm_tree', 'pear', 'pickup_truck', 'pine_tree', 'plain', 'plate', 'poppy', 'porcupine',            
-        'possum', 'rabbit', 'raccoon', 'ray', 'road', 'rocket', 'rose', 'sea', 'seal', 'shark', 'shrew', 'skunk',            
-        'skyscraper', 'snail', 'snake', 'spider', 'squirrel', 'streetcar', 'sunflower', 'sweet_pepper', 'table',            
-        'tank', 'telephone', 'television', 'tiger', 'tractor', 'train', 'trout', 'tulip', 'turtle', 'wardrobe',            
-        'whale', 'willow_tree', 'wolf', 'woman', 'worm']
+    mean: [0.5071, 0.4865, 0.4409]
+    std: [0.2673, 0.2564, 0.2762]
+    train: ["datasets.CIFAR100(root=args.data_dir, train=True,
+             download=True, transform=train_transform)"]
+    test: ["datasets.CIFAR100(root=args.data_dir, train=False,
+            download=True, transform=test_transform)"]
+    classes:  ['apple', 'aquarium_fish', 'baby', 'bear', 'beaver', 'bed',
+               'bee', 'beetle', 'bicycle', 'bottle', 'bowl', 'boy', 'bridge',
+               'bus', 'butterfly', 'camel', 'can', 'castle', 'caterpillar',
+               'cattle', 'chair', 'chimpanzee', 'clock', 'cloud', 'cockroach',
+               'couch', 'crab', 'crocodile', 'cup', 'dinosaur', 'dolphin',
+               'elephant', 'flatfish', 'forest', 'fox', 'girl', 'hamster',
+               'house', 'kangaroo', 'keyboard', 'lamp', 'lawn_mower',
+               'leopard', 'lion', 'lizard', 'lobster', 'man', 'maple_tree',
+               'motorcycle', 'mountain', 'mouse', 'mushroom', 'oak_tree',
+               'orange', 'orchid', 'otter', 'palm_tree', 'pear',
+               'pickup_truck', 'pine_tree', 'plain', 'plate', 'poppy',
+               'porcupine', 'possum', 'rabbit', 'raccoon', 'ray', 'road',
+               'rocket', 'rose', 'sea', 'seal', 'shark', 'shrew', 'skunk',
+               'skyscraper', 'snail', 'snake', 'spider', 'squirrel',
+               'streetcar', 'sunflower', 'sweet_pepper', 'table', 'tank',
+               'telephone', 'television', 'tiger', 'tractor', 'train', 'trout',
+               'tulip', 'turtle', 'wardrobe', 'whale', 'willow_tree', 'wolf',
+               'woman', 'worm']
 
   Food101:
     width: 224
     height: 224
     channels: 3
-    mean: 
-    std: 
-    classes: ['macarons', 'french_toast', 'lobster_bisque', 'prime_rib', 'pork_chop', 'guacamole', 'baby_back_ribs', 'mussels', 'beef_carpaccio', 'poutine',
-              'hot_and_sour_soup', 'seaweed_salad', 'foie_gras', 'dumplings', 'peking_duck', 'takoyaki', 'bibimbap', 'falafel', 'pulled_pork_sandwich', 'lobster_roll_sandwich',
-              'carrot_cake', 'beet_salad', 'panna_cotta', 'donuts', 'red_velvet_cake', 'grilled_cheese_sandwich', 'cannoli', 'spring_rolls', 'shrimp_and_grits',
-              'clam_chowder','omelette', 'fried_calamari', 'caprese_salad', 'oysters', 'scallops', 'ramen', 'grilled_salmon', 'croque_madame', 'filet_mignon',
-              'hamburger', 'spaghetti_carbonara', 'miso_soup', 'bread_pudding', 'lasagna', 'crab_cakes', 'cheesecake', 'spaghetti_bolognese', 'cup_cakes', 'creme_brulee',
-              'waffles', 'fish_and_chips', 'paella', 'macaroni_and_cheese', 'chocolate_mousse', 'ravioli', 'chicken_curry', 'caesar_salad', 'nachos', 'tiramisu', 'frozen_yogurt',
-              'ice_cream', 'risotto', 'club_sandwich', 'strawberry_shortcake', 'steak', 'churros', 'garlic_bread', 'baklava', 'bruschetta', 'hummus', 'chicken_wings',
-              'greek_salad', 'tuna_tartare', 'chocolate_cake', 'gyoza', 'eggs_benedict', 'deviled_eggs', 'samosa', 'sushi', 'breakfast_burrito', 'ceviche', 'beef_tartare',
-              'apple_pie', '.DS_Store', 'huevos_rancheros', 'beignets', 'pizza', 'edamame', 'french_onion_soup', 'hot_dog', 'tacos', 'chicken_quesadilla', 'pho', 'gnocchi',
-              'pancakes', 'fried_rice', 'cheese_plate', 'onion_rings', 'escargots', 'sashimi', 'pad_thai', 'french_fries']
+    mean: [0.485, 0.456, 0.406]
+    std: [0.229, 0.224, 0.225]
+    train: ["datasets.Food101(root=args.data_dir, split='train', download=True,
+                             transform=train_transform)"]
+    test: ["datasets.Food101(root=args.data_dir, split='val', download=True,
+                            transform=test_transform)"]
+    classes: ['macarons', 'french_toast', 'lobster_bisque', 'prime_rib',
+              'pork_chop', 'guacamole', 'baby_back_ribs', 'mussels',
+              'beef_carpaccio', 'poutine', 'hot_and_sour_soup',
+              'seaweed_salad', 'foie_gras', 'dumplings', 'peking_duck',
+              'takoyaki', 'bibimbap', 'falafel', 'pulled_pork_sandwich',
+              'lobster_roll_sandwich','carrot_cake', 'beet_salad',
+              'panna_cotta', 'donuts', 'red_velvet_cake',
+              'grilled_cheese_sandwich', 'cannoli', 'spring_rolls',
+              'shrimp_and_grits', 'clam_chowder','omelette', 'fried_calamari',
+              'caprese_salad', 'oysters', 'scallops', 'ramen',
+              'grilled_salmon', 'croque_madame', 'filet_mignon','hamburger',
+              'spaghetti_carbonara', 'miso_soup', 'bread_pudding', 'lasagna',
+              'crab_cakes', 'cheesecake', 'spaghetti_bolognese', 'cup_cakes',
+              'creme_brulee', 'waffles', 'fish_and_chips', 'paella',
+              'macaroni_and_cheese', 'chocolate_mousse', 'ravioli',
+              'chicken_curry', 'caesar_salad', 'nachos', 'tiramisu',
+              'frozen_yogurt', 'ice_cream', 'risotto', 'club_sandwich',
+              'strawberry_shortcake', 'steak', 'churros', 'garlic_bread',
+              'baklava', 'bruschetta', 'hummus', 'chicken_wings','greek_salad',
+              'tuna_tartare', 'chocolate_cake', 'gyoza', 'eggs_benedict',
+              'deviled_eggs', 'samosa', 'sushi', 'breakfast_burrito',
+              'ceviche', 'beef_tartare', 'apple_pie', '.DS_Store',
+              'huevos_rancheros', 'beignets', 'pizza', 'edamame',
+              'french_onion_soup', 'hot_dog', 'tacos', 'chicken_quesadilla',
+              'pho', 'gnocchi', 'pancakes', 'fried_rice', 'cheese_plate',
+              'onion_rings', 'escargots', 'sashimi', 'pad_thai',
+              'french_fries']
+
   Flower102:
     width: 224
     height: 224
     channels: 3
     mean: [-0.2273, -0.3307, -0.4871]
     std: [3.3055, 2.8272, 3.1214]
-    classes: ["pink primrose", "hard-leaved pocket orchid", "canterbury bells", "sweet pea", "english marigold", 
-            "tiger lily", "moon orchid", "bird of paradise", "monkshood", "globe thistle", "snapdragon",
-             "colt's foot", "king protea", "spear thistle", "yellow iris", "globe-flower", "purple coneflower", "peruvian lily",
-            "balloon flower", "giant white arum lily", "fire lily", "pincushion flower", "fritillary", "red ginger", "grape hyacinth",
-            "corn poppy", "prince of wales feathers", "stemless gentian", "artichoke", "sweet william", "carnation", "garden phlox", 
-            "love in the mist", "mexican aster", "alpine sea holly", "ruby-lipped cattleya", "cape flower", "great masterwort", 
-            "siam tulip", "lenten rose", "barbeton daisy", "daffodil", "sword lily", "poinsettia", "bolero deep blue", "wallflower", 
-            "marigold", "buttercup", "oxeye daisy", "common dandelion", "petunia", "wild pansy", "primula", "sunflower", "pelargonium", 
-            "bishop of llandaff", "gaura", "geranium", "orange dahlia", "pink-yellow dahlia", "cautleya spicata", "japanese anemone", 
-            "black-eyed susan", "silverbush", "californian poppy", "osteospermum", "spring crocus", "bearded iris", "windflower", "tree poppy", 
-            "gazania", "azalea", "water lily", "rose", "thorn apple", "morning glory", "passion flower", "lotus", "toad lily", "anthurium", 
-            "frangipani", "clematis", "hibiscus", "columbine", "desert-rose", "tree mallow", "magnolia", "cyclamen", "watercress", 
-            "canna lily", "hippeastrum", "bee balm", "ball moss", "foxglove", "bougainvillea", "camellia", "mallow", "mexican petunia", 
-            "bromelia", "blanket flower", "trumpet creeper", "blackberry lily"]
+    train: ["datasets.Food101(root=args.data_dir, split='train', download=True,
+                             transform=train_transform)"]
+    test: ["datasets.Food101(root=args.data_dir, split='val', download=True,
+                            transform=test_transform)"]
+    classes: ['pink primrose', 'hard-leaved pocket orchid', 'canterbury bells',
+              'sweet pea', 'english marigold','tiger lily', 'moon orchid',
+              'bird of paradise', 'monkshood', 'globe thistle', 'snapdragon',
+              'colts foot', 'king protea', 'spear thistle', 'yellow iris',
+              'globe-flower', 'purple coneflower', 'peruvian lily',
+              'balloon flower', 'giant white arum lily', 'fire lily',
+              'pincushion flower', 'fritillary', 'red ginger','grape hyacinth',
+              'corn poppy', 'prince of wales feathers', 'stemless gentian',
+              'artichoke', 'sweet william', 'carnation', 'garden phlox',
+              'love in the mist', 'mexican aster', 'alpine sea holly',
+              'ruby-lipped cattleya', 'cape flower', 'great masterwort',
+              'siam tulip', 'lenten rose', 'barbeton daisy', 'daffodil',
+              'sword lily', 'poinsettia', 'bolero deep blue','wallflower',
+              'marigold', 'buttercup', 'oxeye daisy','common dandelion',
+              'petunia', 'wild pansy', 'primula', 'sunflower', 'pelargonium',
+              'bishop of llandaff', 'gaura', 'geranium', 'orange dahlia',
+              'pink-yellow dahlia', 'cautleya spicata', 'japanese anemone',
+              'black-eyed susan', 'silverbush', 'californian poppy',
+              'osteospermum', 'spring crocus', 'bearded iris', 'windflower',
+              'tree poppy', 'gazania', 'azalea', 'water lily', 'rose',
+              'thorn apple', 'morning glory', 'passion flower', 'lotus',
+              'toad lily', 'anthurium', 'frangipani', 'clematis', 'hibiscus',
+              'columbine', 'desert-rose', 'tree mallow', 'magnolia',
+              'cyclamen', 'watercress', 'canna lily', 'hippeastrum',
+              'bee balm', 'ball moss', 'foxglove', 'bougainvillea', 'camellia',
+              'mallow', 'mexican petunia', 'bromelia', 'blanket flower',
+              'trumpet creeper', 'blackberry lily']
