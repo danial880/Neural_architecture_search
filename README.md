@@ -8,8 +8,8 @@ NAS has the potential to significantly accelerate the development of new neural 
 ## Configuration
 The configuration file is created as the [config.yaml](./config.yaml) is contains the following fields.
 
-*   dataset_to_run: 'name of the dataset'	
-*   datasets: ' contains the paremeters of the datasets
+*   dataset_to_run: name of the dataset
+*   datasets:  contains the paremeters of the datasets
 
 Here in the configuration we need to specify dataset name to search the model architecture. The list of dataset is as folliwing `</DTD, ST10, CIFAR100, Food101 and Flower102/>` objects.
 
