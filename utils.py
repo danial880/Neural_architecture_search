@@ -123,13 +123,12 @@ def load_yaml(yaml_file='config.yaml'):
     return data
 
 
-def data_load_transforms():
-    data = load_yaml()
-    dataset_to_run = data['dataset_to_run']
-    dataset = data['datasets'][dataset_to_run]
-    input_shape = data['hyperparameters']['input_shape']
-    cutout = data['flags']['cutout']
-    cutout_length = data['hyperparameters']['cutout_length']
+def data_load_transforms(cfg):
+    dataset_to_run = cfg['dataset_to_run']
+    dataset = cfg['datasets'][dataset_to_run]
+    input_shape = cfg['hyperparameters']['input_shape']
+    cutout = cfg['flags']['cutout']
+    cutout_length = cfg['hyperparameters']['cutout_length']
     # Find mean and std for given dataset
     normalize = transforms.Normalize(mean=dataset['mean'], std=dataset['std'])
     train_transform = transforms.Compose([RRC(input_shape),

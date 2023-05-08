@@ -45,7 +45,7 @@ class Train():
         Returns:
             A list of class labels for the dataset.
         """
-        train_data, test_data, total_classes = utils.data_load_transforms()
+        train_data, test_data, total_classes = utils.data_load_transforms(self.config)
         # obtain training indices that will be used for validation
         num_train = len(train_data)
         indices = list(range(num_train))
@@ -110,8 +110,9 @@ class Train():
                 utils.save(model, os.path.join(self.save_name, 'weights.pt'))
         logging.info('Best Training Accuracy %f', best_train_acc)
         logging.info('Best Validation Accuracy %f', best_test_acc)
-        utils.load(model, os.path.join(self.save_name, 'weights.pt'))
-        self.classwisetest(model, criterion)
+        if self.config['flags']['save']:
+            utils.load(model, os.path.join(self.save_name, 'weights.pt'))
+            self.classwisetest(model, criterion)
         return best_train_acc, best_test_acc
 
     def train(self, model, criterion, optimizer):
