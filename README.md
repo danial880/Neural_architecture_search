@@ -8,19 +8,22 @@ NAS has the potential to significantly accelerate the development of new neural 
 ## Configuration
 The configuration file is created as the [config.yaml](./config.yaml) is contains the following fields.
 
-*   dataset_to_run: 'name of the dataset'	
-*   datasets: ' contains the paremeters of the datasets
+*   dataset_to_run: name of the dataset	
+*   datasets: contains the paremeters of the datasets
+*   hyperparameters: training parameters
+*   search_parameters: important arguments for network search
+*   random_network_gen: parameters for generating random networks
+*   custom_network: parameters for training a custom network
 
-Here in the configuration we need to specify dataset name to search the model architecture. The list of dataset is as folliwing `</DTD, ST10, CIFAR100, Food101 and Flower102/>` objects.
+Here in the configuration we need to specify dataset name to search the model architecture. Supported datasets `DTD, ST10, CIFAR10, CIFAR100, Food101 and Flowers102` objects.
 
 ## How to run
-To run the neural architecture search code use the [main.py](./main.py). This file needs the following arguments.
-*  data_dir <Path of the directory containing the dataset>
-*  batch_size < specify batch size>
-*  epochs < specify number of epoch>
-*  save <Path to save experiment>
-
-We can use the follwing command to run the code.
-
- `python main.py--batch_size 32 --epochs 100 --save cifar100_experiment`
- 
+##### Neural architecture search
+`python main.py` 
+##### Random network generator
+`python rnd_ntw_gen.py` 
+##### Train custom network
+`python train_custom_net.py`
+##### Parameter Count and Latency
+`python params.py`
+Calculate custom network parameters and latency
