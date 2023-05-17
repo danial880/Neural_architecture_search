@@ -1,4 +1,4 @@
-dataset_to_run: 'CIFAR100'
+dataset_to_run: 'STL10'
 
 device:
   gpu: 0
@@ -10,7 +10,7 @@ flags:
   save: True
 
 logging:
-  report_freq: 30
+  report_freq: 10
   txt_name: 'search_log.txt'
   exp_name: 'hard'
 
@@ -33,7 +33,7 @@ hyperparameters:
   weight_decay: 3e-4
   momentum: 0.9
   grad_clip: 5
-  epochs: 300
+  epochs: 100
   cutout_length: 16
 
 paths:
@@ -62,9 +62,9 @@ datasets:
     channels: 3
     mean: [0.4914, 0.4822, 0.4465]
     std: [0.2023, 0.1994, 0.2010]
-    train: ["datasets.STL10(root=cfg['paths']['data_dir'], train=True,
+    train: ["datasets.STL10(root=cfg['paths']['data_dir'], split='train',
                             download=True, transform=train_transform)"]
-    test: ["datasets.STL10(root=cfg['paths']['data_dir'], train=False,
+    test: ["datasets.STL10(root=cfg['paths']['data_dir'], split='val',
                            download=True, transform=test_transform)"]
     classes: ['airplane', 'bird', 'car', 'cat', 'deer', 'dogs', 'horse',
               'monkey',   'ship', 'truck']

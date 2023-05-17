@@ -126,6 +126,7 @@ def load_yaml(yaml_file='config.yaml'):
 def data_load_transforms(cfg):
     dataset_to_run = cfg['dataset_to_run']
     dataset = cfg['datasets'][dataset_to_run]
+    print('\n\ndataset keys =  ', dataset['train'][0])
     input_shape = cfg['hyperparameters']['input_shape']
     cutout = cfg['flags']['cutout']
     cutout_length = cfg['hyperparameters']['cutout_length']
