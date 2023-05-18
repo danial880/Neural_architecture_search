@@ -1,4 +1,4 @@
-dataset_to_run: 'STL10'
+dataset_to_run: 'DTD'
 
 device:
   gpu: 0
@@ -33,7 +33,7 @@ hyperparameters:
   weight_decay: 3e-4
   momentum: 0.9
   grad_clip: 5
-  epochs: 100
+  epochs: 1
   cutout_length: 16
 
 paths:

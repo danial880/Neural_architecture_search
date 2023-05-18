@@ -44,6 +44,8 @@ class ModelSearch():
         self.input_shape = config['hyperparameters']['input_shape']
 
     def intialize_model(self, arch_ops, arch_kernel):
+        print('self.channels, self.CLASSES, self.layers,arch_ops, arch_kernel, self.input_shape',self.channels, self.CLASSES, self.layers,
+                               arch_ops, arch_kernel, self.input_shape)
         model = NetworkMixArch(self.channels, self.CLASSES, self.layers,
                                arch_ops, arch_kernel, self.input_shape)
         model = model.cuda()
@@ -112,6 +114,7 @@ class ModelSearch():
         # shall not change but only channels.
         # discovered final number of self.layers
         f_layers = len(curr_arch_ops)
+        self.layers = f_layers
         # discovered final number of channels
         f_channels = self.max_width
         logging.info('Discovered Final Depth %s', f_layers)
@@ -123,6 +126,7 @@ class ModelSearch():
             # prepare next candidate architecture.
             self.channels = self.channels - self.width_resolution
             # Although these do not change.
+            print("\n\n\n\nsafsadsadsa = ",curr_arch_ops, curr_arch_kernel)
             model = self.intialize_model(curr_arch_ops, curr_arch_kernel)
             logging.info('Moving to Next Candidate Architecture...')
             self.log_model_details(model, curr_arch_ops, curr_arch_kernel)
