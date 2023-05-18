@@ -39,6 +39,7 @@ def main(save_name):
     torch.manual_seed(seed)
     cudnn.enabled = True
     torch.cuda.manual_seed(seed)
+    logging.info("dataset_to_run = %s", cfg['dataset_to_run'])
     logging.info('GPU Device = %d' % device)
     logging.info("Hyperparameters = %s", config['hyperparameters'])
     logging.info("Search Parameters = %s", config['search_parameters'])

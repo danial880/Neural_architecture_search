@@ -109,7 +109,7 @@ def create_exp_dir(path, scripts_to_save=None):
         os.mkdir(path)
         # os.mkdir(os.path.join(path, 'plots'))
         # os.mkdir(os.path.join(path, 'gifs'))
-    print('Experiment dir : {}'.format(path))
+    #print('Experiment dir : {}'.format(path))
     if scripts_to_save is not None:
         os.mkdir(os.path.join(path, 'scripts'))
         for script in scripts_to_save:
@@ -126,7 +126,7 @@ def load_yaml(yaml_file='config.yaml'):
 def data_load_transforms(cfg):
     dataset_to_run = cfg['dataset_to_run']
     dataset = cfg['datasets'][dataset_to_run]
-    print('\n\ndataset keys =  ', dataset['train'][0])
+    #print('\n\ndataset keys =  ', dataset['train'][0])
     input_shape = cfg['hyperparameters']['input_shape']
     cutout = cfg['flags']['cutout']
     cutout_length = cfg['hyperparameters']['cutout_length']

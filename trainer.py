@@ -66,7 +66,7 @@ class Train():
         dataiter = iter(self.train_queue)
         images, labels = next(dataiter)
         print("***** Shape of the dataset *******", images.size())
-        print('Classes under consideration: ', self.classes)
+        #print('Classes under consideration: ', self.classes)
         logging.info("Classes under consideration: %s", self.classes)
         # return train_queue, valid_queue, test_queue, classes, class_labels
         return self.class_labels
