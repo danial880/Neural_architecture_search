@@ -24,17 +24,17 @@ class Train():
         classes (list): A list of classes in the dataset.
         class_labels (list): A list of labels assigned to the classes.
     """
-    def __init__(self, args):
-        self.batch_size = args.batch_size
-        self.valid_size = args.valid_size
-        dataset_config = utils.load_yaml()
-        self.dataset = dataset_config['dataset_to_run']
-        self.classes = dataset_config['datasets'][self.dataset]['classes']
-        self.class_labels = []
-        for i in range(len(self.classes)):
-            self.class_labels.append(i)
+    def __init__(self, config, save_name):
+        self.config = config
+        self.hyperparameters = self.config['hyperparameters']
+        self.save_name = save_name
+        self.batch_size = self.hyperparameters['batch_size']
+        self.valid_size = self.hyperparameters['valid_size']
+        self.dataset = self.config['dataset_to_run']
+        self.classes = self.config['datasets'][self.dataset]['classes']
+        self.class_labels = list(np.arange(len(self.classes)))
 
-    def get_desired_dataset(self, args, logging):
+    def get_desired_dataset(self, logging):
         """
         Retrieves the desired dataset for training.
 
@@ -45,7 +45,7 @@ class Train():
         Returns:
             A list of class labels for the dataset.
         """
-        train_data, test_data, total_classes = utils.data_load_transforms(args)
+        train_data, test_data, total_classes = utils.data_load_transforms(self.config)
         # obtain training indices that will be used for validation
         num_train = len(train_data)
         indices = list(range(num_train))
@@ -66,33 +66,35 @@ class Train():
         dataiter = iter(self.train_queue)
         images, labels = next(dataiter)
         print("***** Shape of the dataset *******", images.size())
-        print('Classes under consideration: ', self.classes)
+        #print('Classes under consideration: ', self.classes)
         logging.info("Classes under consideration: %s", self.classes)
         # return train_queue, valid_queue, test_queue, classes, class_labels
         return self.class_labels
 
-    def train_test(self, args,  model):
+    def train_test(self,  model):
         criterion = nn.CrossEntropyLoss()
         criterion = criterion.cuda()
-        optimizer = torch.optim.SGD(model.parameters(), args.learning_rate,
-                                    momentum=args.momentum,
-                                    weight_decay=args.weight_decay)
-        scheduler = CosineAnnealingLR(optimizer, float(args.epochs))
+        optimizer = torch.optim.SGD(model.parameters(),
+                                    self.hyperparameters['learning_rate'],
+                                    momentum=self.hyperparameters['momentum'],
+                                    weight_decay=eval(self.hyperparameters['weight_decay']))
+        epochs = self.hyperparameters['epochs']
+        scheduler = CosineAnnealingLR(optimizer, float(epochs))
         best_train_acc = 0.0
         best_test_acc = 0.0
-        for epoch in range(args.epochs):
+        report_freq = self.config['logging']['report_freq']
+        for epoch in range(epochs):
             scheduler.step()
             start_time = time.time()
-            train_acc, train_obj = self.train(args,  model, criterion,
-                                              optimizer)
+            train_acc, train_obj = self.train(model, criterion, optimizer)
             # logging.info('train_acc %f', train_acc)
             if self.valid_size == 0:
-                valid_acc, valid_obj = self.infer(args, self.test_queue, model,
+                valid_acc, valid_obj = self.infer(self.test_queue, model,
                                                   criterion)
             else:
-                valid_acc, valid_obj = self.infer(args, self.valid_queue,
+                valid_acc, valid_obj = self.infer(self.valid_queue,
                                                   model, criterion)
-            if epoch % args.report_freq == 0:
+            if epoch % report_freq == 0:
                 logging.info('epoch %d lr %e', epoch, scheduler.get_lr()[0])
                 logging.info('train_acc %f', train_acc)
                 logging.info('valid_acc %f', valid_acc)
@@ -103,46 +105,49 @@ class Train():
             print('Valid_acc: %f ' % valid_acc)
             if train_acc > best_train_acc:
                 best_train_acc = train_acc
-            if valid_acc > best_test_acc:
+            if (valid_acc > best_test_acc) & self.config['flags']['save']:
                 best_test_acc = valid_acc
-                utils.save(model, os.path.join(args.save, 'weights.pt'))
+                utils.save(model, os.path.join(self.save_name, 'weights.pt'))
         logging.info('Best Training Accuracy %f', best_train_acc)
         logging.info('Best Validation Accuracy %f', best_test_acc)
-        utils.load(model, os.path.join(args.save, 'weights.pt'))
-        self.classwisetest(model, criterion)
+        if self.config['flags']['save']:
+            utils.load(model, os.path.join(self.save_name, 'weights.pt'))
+            self.classwisetest(model, criterion)
         return best_train_acc, best_test_acc
 
-    def train(self, args, model, criterion, optimizer):
+    def train(self, model, criterion, optimizer):
         objs = utils.AvgrageMeter()
         top1 = utils.AvgrageMeter()
         model.train()
-        for step, (input, target) in enumerate(self.train_queue):
-            input = input.cuda(non_blocking=True)
+        
+        for step, (inputs, target) in enumerate(self.train_queue):
+            inputs = inputs.cuda(non_blocking=True)
             target = target.cuda(non_blocking=True)
             optimizer.zero_grad()
-            logits = model(input)
+            logits = model(inputs)
             loss = criterion(logits, target)
             loss.backward()
-            nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip)
+            nn.utils.clip_grad_norm_(model.parameters(),
+                                     self.hyperparameters['grad_clip'])
             optimizer.step()
             prec1 = utils.accuracy(logits, target, topk=(1,))
-            n = input.size(0)
+            n = inputs.size(0)
             objs.update(loss.data.item(), n)
             top1.update(prec1, n)
         return top1.avg, objs.avg
 
-    def infer(self, args, data,  model, criterion):
+    def infer(self, data,  model, criterion):
         objs = utils.AvgrageMeter()
         top1 = utils.AvgrageMeter()
         model.eval()
-        for step, (input, target) in enumerate(data):
-            input = input.cuda(non_blocking=True)
+        for step, (inputs, target) in enumerate(data):
+            inputs = inputs.cuda(non_blocking=True)
             target = target.cuda(non_blocking=True)
             with torch.no_grad():
-                logits = model(input)
+                logits = model(inputs)
                 loss = criterion(logits, target)
             prec1 = utils.accuracy(logits, target, topk=(1,))
-            n = input.size(0)
+            n = inputs.size(0)
             objs.update(loss.data.item(), n)
             # top1.update(prec1.data.item(), n)
             top1.update(prec1, n)

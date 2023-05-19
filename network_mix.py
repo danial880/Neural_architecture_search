@@ -75,7 +75,7 @@ class NetworkMixArch(nn.Module):
         self._layers = layers
         # Set stride to 2 for first layers based on image size
         strides = [1, 1, 1]
-        for i in range(image_size[0] // 64):
+        for i in range(image_size // 64):
             strides[i] = 2
         # Define stem layers
         self.stem = nn.Sequential(

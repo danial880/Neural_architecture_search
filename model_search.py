@@ -27,24 +27,21 @@ class ModelSearch():
         dataset (str): The name of the dataset being used for training.
         input_shape (list): The shape of the input data.
     """
-    def __init__(self, args, class_labels):
+    def __init__(self, config, class_labels):
+        search_params = config['search_parameters']
         self.CLASSES = len(np.array(class_labels))
-        self.target_acc = args.target_acc
-        self.min_width = args.min_width
-        self.max_width = args.max_width
-        self.width_resolution = args.width_resolution
-        self.min_depth = args.min_depth
-        self.max_depth = args.max_depth
-        self.ch_drop_tolerance = args.ch_drop_tolerance
-        self.target_acc_tolerance = args.target_acc_tolerance
+        self.target_acc = search_params['target_acc']
+        self.min_width = search_params['min_width_channels']
+        self.max_width = search_params['max_width_channels']
+        self.width_resolution = search_params['width_resolution']
+        self.min_depth = search_params['min_depth_layers']
+        self.max_depth = search_params['max_depth_layers']
+        self.ch_drop_tolerance = search_params['ch_drop_tolerance']
+        self.target_acc_tolerance = search_params['target_acc_tolerance']
         # We start with max width but with min depth.
         self.channels = self.max_width
         self.layers = self.min_depth
-        dataset_config = utils.load_yaml()
-        self.dataset = dataset_config['dataset_to_run']
-        width = dataset_config['datasets'][self.dataset]['width']
-        height = dataset_config['datasets'][self.dataset]['height']
-        self.input_shape = [width, height]
+        self.input_shape = config['hyperparameters']['input_shape']
 
     def intialize_model(self, arch_ops, arch_kernel):
         model = NetworkMixArch(self.channels, self.CLASSES, self.layers,
@@ -66,7 +63,7 @@ class ModelSearch():
         logging.info("Best Training Accuracy %f Best Validation Accuracy %f",
                      train_acc, test_acc)
 
-    def search_depth_and_width(self, args, class_labels, train_test, train):
+    def search_depth_and_width(self, class_labels, train_test, train):
 
         logging.info('INITIALIZING DEPTH AND WIDTH SEARCH...')
 
@@ -79,7 +76,7 @@ class ModelSearch():
         logging.info('RUNNING DEPTH SEARCH FIRST...')
         model = self.intialize_model(curr_arch_ops, curr_arch_kernel)
         self.log_model_details(model, curr_arch_ops, curr_arch_kernel)
-        curr_arch_train_acc, curr_arch_test_acc = train_test(args, model)
+        curr_arch_train_acc, curr_arch_test_acc = train_test(model)
         self.log_acc(curr_arch_train_acc, curr_arch_test_acc)
         # Search depth
         diff_target_acc = self.target_acc - self.target_acc_tolerance
@@ -97,8 +94,7 @@ class ModelSearch():
                 utils.log_hash()
                 logging.info('Moving to Next Candidate Architecture...')
                 self.log_model_details(model, next_arch_ops, next_arch_kernel)
-                next_arch_train_acc, next_arch_test_acc = train_test(args,
-                                                                     model)
+                next_arch_train_acc, next_arch_test_acc = train_test(model)
                 self.log_acc(next_arch_train_acc, next_arch_test_acc)
                 # As long as we get significant improvement by increasing depth
                 if (next_arch_test_acc >= curr_arch_test_acc + 0.25):
@@ -116,6 +112,7 @@ class ModelSearch():
         # shall not change but only channels.
         # discovered final number of self.layers
         f_layers = len(curr_arch_ops)
+        self.layers = f_layers
         # discovered final number of channels
         f_channels = self.max_width
         logging.info('Discovered Final Depth %s', f_layers)
@@ -127,11 +124,12 @@ class ModelSearch():
             # prepare next candidate architecture.
             self.channels = self.channels - self.width_resolution
             # Although these do not change.
+            #print("\n\n\n\nsafsadsadsa = ",curr_arch_ops, curr_arch_kernel)
             model = self.intialize_model(curr_arch_ops, curr_arch_kernel)
             logging.info('Moving to Next Candidate Architecture...')
             self.log_model_details(model, curr_arch_ops, curr_arch_kernel)
             # train and test candidate architecture.
-            next_arch_train_acc, next_arch_test_acc = train_test(args,  model)
+            next_arch_train_acc, next_arch_test_acc = train_test(model)
             self.log_acc(next_arch_train_acc, next_arch_test_acc)
             diff_best_acc = best_arch_test_acc - self.ch_drop_tolerance
             if (next_arch_test_acc >= (diff_best_acc)):
@@ -146,7 +144,7 @@ class ModelSearch():
         return curr_arch_ops, curr_arch_kernel, f_channels, f_layers, \
             curr_arch_train_acc, curr_arch_test_acc
 
-    def search_operations(self, args, class_labels, train_test, train,
+    def search_operations(self, class_labels, train_test, train,
                           model_info):
 
         logging.info('RUNNING OPERATION SEARCH...')
@@ -166,7 +164,7 @@ class ModelSearch():
             next_arch_ops[i] = 1
             model = self.intialize_model(next_arch_ops, next_arch_kernel)
             self.log_model_details(model, next_arch_ops, next_arch_kernel)
-            next_arch_train_acc, next_arch_test_acc = train_test(args, model)
+            next_arch_train_acc, next_arch_test_acc = train_test(model)
             self.log_acc(next_arch_train_acc, next_arch_test_acc)
             if next_arch_test_acc > curr_arch_test_acc:
                 curr_arch_ops = next_arch_ops
@@ -182,7 +180,7 @@ class ModelSearch():
         return curr_arch_ops, curr_arch_kernel, curr_arch_train_acc, \
             curr_arch_test_acc
 
-    def search_kernels(self, args, class_labels, train_test, train,
+    def search_kernels(self, class_labels, train_test, train,
                        model_info):
         logging.info('RUNNING KERNEL SEARCH...')
         curr_arch_ops = model_info['curr_arch_ops']
@@ -200,8 +198,7 @@ class ModelSearch():
                 next_arch_kernel[i] = k
                 model = self.intialize_model(next_arch_ops, next_arch_kernel)
                 self.log_model_details(model, next_arch_ops, next_arch_kernel)
-                next_arch_train_acc, next_arch_test_acc = train_test(args,
-                                                                     model)
+                next_arch_train_acc, next_arch_test_acc = train_test(model)
                 self.log_acc(next_arch_train_acc, next_arch_test_acc)
                 # Bigger kernel comes at a cost therefore possibility of a
                 # search hyper parameter exists.
@@ -219,17 +216,17 @@ class ModelSearch():
         return curr_arch_ops, curr_arch_kernel, curr_arch_train_acc, \
             curr_arch_test_acc
 
-    def search_operations_and_kernels(self, args, model_info, class_labels,
+    def search_operations_and_kernels(self, model_info, class_labels,
                                       train_test, train):
-        result_ops = self.search_operations(args, class_labels, train_test,
-                                            train, model_info)
+        result_ops = self.search_operations(class_labels, train_test, train,
+                                            model_info)
         curr_arch_ops, curr_arch_kernel = result_ops[:2]
         curr_arch_train_acc, curr_arch_test_acc = result_ops[2:]
         model_info['curr_arch_ops'] = curr_arch_ops
         model_info['curr_arch_kernel'] = curr_arch_kernel
         model_info['curr_arch_train_acc'] = curr_arch_train_acc
         model_info['curr_arch_test_acc'] = curr_arch_test_acc
-        result_krnls = self.search_kernels(args, class_labels, train_test,
+        result_krnls = self.search_kernels(class_labels, train_test,
                                            train, model_info)
         curr_arch_ops, curr_arch_kernel = result_krnls[:2]
         curr_arch_train_acc, curr_arch_test_acc = result_krnls[2:]

@@ -67,19 +67,19 @@ def log_hash():
     logging.info('#########################################################\n')
 
 
-def _data_transforms_cifar10(args):
-    CIFAR_MEAN = [0.49139968, 0.48215827, 0.44653124]
-    CIFAR_STD = [0.24703233, 0.24348505, 0.26158768]
-    normalize = transforms.Normalize(CIFAR_MEAN, CIFAR_STD)
-    train_transform = transforms.Compose([transforms.RandomCrop(32, padding=4),
-                                          transforms.RandomHorizontalFlip(),
-                                          transforms.ToTensor(),
-                                          normalize])
-    if args.cutout:
-        train_transform.transforms.append(Cutout(args.cutout_length))
-        valid_transform = transforms.Compose([transforms.ToTensor(),
-                                              normalize])
-    return train_transform, valid_transform
+#def _data_transforms_cifar10(args):
+#    CIFAR_MEAN = [0.49139968, 0.48215827, 0.44653124]
+#    CIFAR_STD = [0.24703233, 0.24348505, 0.26158768]
+#    normalize = transforms.Normalize(CIFAR_MEAN, CIFAR_STD)
+#    train_transform = transforms.Compose([transforms.RandomCrop(32, padding=4),
+#                                          transforms.RandomHorizontalFlip(),
+#                                          transforms.ToTensor(),
+#                                          normalize])
+#    if args.cutout:
+#        train_transform.transforms.append(Cutout(args.cutout_length))
+#    valid_transform = transforms.Compose([transforms.ToTensor(),
+#                                              normalize])
+#    return train_transform, valid_transform
 
 
 def count_parameters_in_MB(model):
@@ -109,8 +109,7 @@ def create_exp_dir(path, scripts_to_save=None):
         os.mkdir(path)
         # os.mkdir(os.path.join(path, 'plots'))
         # os.mkdir(os.path.join(path, 'gifs'))
-    print('Experiment dir : {}'.format(path))
-
+    #print('Experiment dir : {}'.format(path))
     if scripts_to_save is not None:
         os.mkdir(os.path.join(path, 'scripts'))
         for script in scripts_to_save:
@@ -124,19 +123,24 @@ def load_yaml(yaml_file='config.yaml'):
     return data
 
 
-def data_load_transforms(args):
-    data = load_yaml()
-    dataset_to_run = data['dataset_to_run']
-    dataset = data['datasets'][dataset_to_run]
+def data_load_transforms(cfg):
+    dataset_to_run = cfg['dataset_to_run']
+    dataset = cfg['datasets'][dataset_to_run]
+    #print('\n\ndataset keys =  ', dataset['train'][0])
+    input_shape = cfg['hyperparameters']['input_shape']
+    cutout = cfg['flags']['cutout']
+    cutout_length = cfg['hyperparameters']['cutout_length']
     # Find mean and std for given dataset
     normalize = transforms.Normalize(mean=dataset['mean'], std=dataset['std'])
-    train_transform = transforms.Compose([RRC(args.input_shape),
+    train_transform = transforms.Compose([RRC(input_shape),
                                           transforms.RandomHorizontalFlip(),
                                           CJ(brightness=0.4, contrast=0.4,
                                              saturation=0.4, hue=0.2),
                                           transforms.ToTensor(), normalize])
-    test_transform = transforms.Compose([transforms.Resize(args.input_shape),
-                                         CC(args.input_shape),
+    if cutout:
+        train_transform.transforms.append(Cutout(cutout_length))
+    test_transform = transforms.Compose([transforms.Resize(input_shape),
+                                         CC(input_shape),
                                          transforms.ToTensor(), normalize])
     train_data = eval(dataset['train'][0])
     test_data = eval(dataset['test'][0])
