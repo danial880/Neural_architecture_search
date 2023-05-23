@@ -80,15 +80,15 @@ class Train():
                                     momentum=self.hyperparameters['momentum'],
                                     weight_decay=eval(self.hyperparameters['weight_decay']))
         epochs = self.hyperparameters['epochs']
-        scheduler = CosineAnnealingLR(optimizer, float(epochs))
+        best_train_acc = 0.0
         if self.config['flags']['resume']:
             print('initializing resume')
             checkpoint = torch.load(self.config['paths']['resume_checkpoint'])
             model.load_state_dict(checkpoint['model_state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-            scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
-
-        best_train_acc = 0.0
+            best_train_acc = checkpoint['hyperparameters']['best_train_acc']
+        scheduler = CosineAnnealingLR(optimizer, float(epochs))
+        
         best_test_acc = 0.0
         report_freq = self.config['logging']['report_freq']
         start_epoch = checkpoint['epoch'] + 1 if self.config['flags']['resume'] else 0
@@ -117,22 +117,22 @@ class Train():
             if (valid_acc > best_test_acc) & self.config['flags']['save']:
                 best_test_acc = valid_acc
                 utils.save(model, os.path.join(self.save_name, 'weights.pt'))
-            checkpoint = {
-            'epoch' : epoch,
-            'model_state_dict' : model.state_dict(),
-            'optimizer_state_dict' : optimizer.state_dict(),
-            'scheduler_state_dict' : scheduler.state_dict(),
-            'hyperparameters' : {
-                'learning_rate' : self.hyperparameters['learning_rate'],
-                'momentum' : self.hyperparameters['momentum'],
-                'weight_decay' : eval(self.hyperparameters['weight_decay']),
-                'batch_size' : self.hyperparameters['batch_size'],
-                'num_epochs' : epochs,
-                'grad_clip' : self.hyperparameters['grad_clip']
-                            }
-                     }
-            torch.save(checkpoint, 
-                       os.path.join(self.save_name, 'checkpoint.pt'))
+                checkpoint = {
+                'epoch' : epoch,
+                'model_state_dict' : model.state_dict(),
+                'optimizer_state_dict' : optimizer.state_dict(),
+                'hyperparameters' : {
+                    'learning_rate' : self.hyperparameters['learning_rate'],
+                    'momentum' : self.hyperparameters['momentum'],
+                    'weight_decay' : eval(self.hyperparameters['weight_decay']),
+                    'batch_size' : self.hyperparameters['batch_size'],
+                    'num_epochs' : epochs,
+                    'grad_clip' : self.hyperparameters['grad_clip'],
+                    'best_train_acc': best_train_acc
+                                }
+                         }
+                torch.save(checkpoint, 
+                           os.path.join(self.save_name, 'checkpoint.pt'))
         logging.info('Best Training Accuracy %f', best_train_acc)
         logging.info('Best Validation Accuracy %f', best_test_acc)
         if self.config['flags']['save']:

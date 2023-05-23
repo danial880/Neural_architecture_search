@@ -38,7 +38,7 @@ hyperparameters:
 
 paths:
   data_dir: './data'
-  resume_checkpoint: './Search-hard-20230523-195610/checkpoint.pt'
+  resume_checkpoint: './Search-hard-20230523-203749/checkpoint.pt'
 
 random_network_gen:
   num_net: 10
