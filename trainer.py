@@ -5,6 +5,7 @@ import utils
 import logging
 import numpy as np
 import torch.nn as nn
+from tqdm import tqdm
 from torch.utils.data import DataLoader
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from torch.utils.data.sampler import SubsetRandomSampler
@@ -80,13 +81,20 @@ class Train():
                                     weight_decay=eval(self.hyperparameters['weight_decay']))
         epochs = self.hyperparameters['epochs']
         scheduler = CosineAnnealingLR(optimizer, float(epochs))
+        if self.config['flags']['resume']:
+            print('initializing resume')
+            checkpoint = torch.load(self.config['paths']['resume_checkpoint'])
+            model.load_state_dict(checkpoint['model_state_dict'])
+            optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+            scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
+
         best_train_acc = 0.0
         best_test_acc = 0.0
         report_freq = self.config['logging']['report_freq']
-        for epoch in range(epochs):
-            scheduler.step()
+        start_epoch = checkpoint['epoch'] + 1 if self.config['flags']['resume'] else 0
+        for epoch in tqdm(range(start_epoch, epochs)):
             start_time = time.time()
-            train_acc, train_obj = self.train(model, criterion, optimizer)
+            train_acc, train_obj = self.train(model, criterion, optimizer)           
             # logging.info('train_acc %f', train_acc)
             if self.valid_size == 0:
                 valid_acc, valid_obj = self.infer(self.test_queue, model,
@@ -94,8 +102,9 @@ class Train():
             else:
                 valid_acc, valid_obj = self.infer(self.valid_queue,
                                                   model, criterion)
+            scheduler.step()
             if epoch % report_freq == 0:
-                logging.info('epoch %d lr %e', epoch, scheduler.get_lr()[0])
+                logging.info('epoch %d lr %e', epoch, scheduler.get_last_lr()[0])
                 logging.info('train_acc %f', train_acc)
                 logging.info('valid_acc %f', valid_acc)
             end_time = time.time()
@@ -108,6 +117,22 @@ class Train():
             if (valid_acc > best_test_acc) & self.config['flags']['save']:
                 best_test_acc = valid_acc
                 utils.save(model, os.path.join(self.save_name, 'weights.pt'))
+            checkpoint = {
+            'epoch' : epoch,
+            'model_state_dict' : model.state_dict(),
+            'optimizer_state_dict' : optimizer.state_dict(),
+            'scheduler_state_dict' : scheduler.state_dict(),
+            'hyperparameters' : {
+                'learning_rate' : self.hyperparameters['learning_rate'],
+                'momentum' : self.hyperparameters['momentum'],
+                'weight_decay' : eval(self.hyperparameters['weight_decay']),
+                'batch_size' : self.hyperparameters['batch_size'],
+                'num_epochs' : epochs,
+                'grad_clip' : self.hyperparameters['grad_clip']
+                            }
+                     }
+            torch.save(checkpoint, 
+                       os.path.join(self.save_name, 'checkpoint.pt'))
         logging.info('Best Training Accuracy %f', best_train_acc)
         logging.info('Best Validation Accuracy %f', best_test_acc)
         if self.config['flags']['save']:
