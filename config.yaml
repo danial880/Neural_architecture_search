@@ -1,4 +1,4 @@
-dataset_to_run: 'DTD'
+dataset_to_run: 'CIFAR10'
 
 device:
   gpu: 0
@@ -6,7 +6,7 @@ device:
 flags:
   auto_augment: False
   cutout: False
-  resume: False
+  resume: True
   save: True
 
 logging:
@@ -33,12 +33,12 @@ hyperparameters:
   weight_decay: 3e-4
   momentum: 0.9
   grad_clip: 5
-  epochs: 1
+  epochs: 80
   cutout_length: 16
 
 paths:
   data_dir: './data'
-  resume_checkpoint: ''
+  resume_checkpoint: './Search-hard-20230523-203749/checkpoint.pt'
 
 random_network_gen:
   num_net: 10

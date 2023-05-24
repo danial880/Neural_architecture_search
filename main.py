@@ -43,6 +43,7 @@ def main(save_name):
     logging.info('GPU Device = %d' % device)
     logging.info("Hyperparameters = %s", config['hyperparameters'])
     logging.info("Search Parameters = %s", config['search_parameters'])
+    config['flags']['resume'] = False
     trainer = Train(config, save_name)
     # Log sub dataset under consideration.
     class_labels = trainer.get_desired_dataset(logging)
