@@ -72,14 +72,14 @@ class Train():
         # return train_queue, valid_queue, test_queue, classes, class_labels
         return self.class_labels
 
-    def train_test(self,  model):
+    def train_test(self,  model, epochs):
         criterion = nn.CrossEntropyLoss()
         criterion = criterion.cuda()
         optimizer = torch.optim.SGD(model.parameters(),
                                     self.hyperparameters['learning_rate'],
                                     momentum=self.hyperparameters['momentum'],
                                     weight_decay=eval(self.hyperparameters['weight_decay']))
-        epochs = self.hyperparameters['epochs']
+        #epochs = self.hyperparameters['epochs']
         best_train_acc = 0.0
         if self.config['flags']['resume']:
             print('initializing resume')
