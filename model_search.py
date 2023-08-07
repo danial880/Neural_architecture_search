@@ -78,7 +78,8 @@ class ModelSearch():
         model = self.intialize_model(curr_arch_ops, curr_arch_kernel)
         self.log_model_details(model, curr_arch_ops, curr_arch_kernel)
         epoch_depth = self.hyperparameters['epoch_depth']
-        curr_arch_train_acc, curr_arch_test_acc = train_test(model, epoch_depth)
+        epoch_base = self.hyperparameters['epoch_base']
+        curr_arch_train_acc, curr_arch_test_acc = train_test(model, epoch_base)
         self.log_acc(curr_arch_train_acc, curr_arch_test_acc)
         # Search depth
         diff_target_acc = self.target_acc - self.target_acc_tolerance
@@ -122,6 +123,7 @@ class ModelSearch():
         best_arch_test_acc = curr_arch_test_acc
         utils.log_hash()
         logging.info('RUNNING WIDTH SEARCH NOW...')
+        epoch_width = self.hyperparameters['epoch_width']
         while (self.channels > self.min_width):
             # prepare next candidate architecture.
             self.channels = self.channels - self.width_resolution
@@ -130,8 +132,7 @@ class ModelSearch():
             model = self.intialize_model(curr_arch_ops, curr_arch_kernel)
             logging.info('Moving to Next Candidate Architecture...')
             self.log_model_details(model, curr_arch_ops, curr_arch_kernel)
-            # train and test candidate architecture.
-            epoch_width = self.hyperparameters['epoch_width']
+            # train and test candidate architecture.          
             next_arch_train_acc, next_arch_test_acc = train_test(model, epoch_width)
             self.log_acc(next_arch_train_acc, next_arch_test_acc)
             diff_best_acc = best_arch_test_acc - self.ch_drop_tolerance
@@ -158,7 +159,7 @@ class ModelSearch():
         curr_arch_test_acc = model_info['curr_arch_test_acc']
         self.channels = model_info['f_channels']
         self.layers = model_info['f_layers']
-
+        epoch_opts = self.hyperparameters['epoch_opts']
         next_arch_ops = curr_arch_ops
         next_arch_kernel = curr_arch_kernel
 
@@ -166,8 +167,7 @@ class ModelSearch():
 
             next_arch_ops[i] = 1
             model = self.intialize_model(next_arch_ops, next_arch_kernel)
-            self.log_model_details(model, next_arch_ops, next_arch_kernel)
-            epoch_opts = self.hyperparameters['epoch_opts']
+            self.log_model_details(model, next_arch_ops, next_arch_kernel)       
             next_arch_train_acc, next_arch_test_acc = train_test(model, epoch_opts)
             self.log_acc(next_arch_train_acc, next_arch_test_acc)
             if next_arch_test_acc > curr_arch_test_acc:
@@ -196,13 +196,13 @@ class ModelSearch():
         next_arch_ops = curr_arch_ops
         next_arch_kernel = curr_arch_kernel
         kernels = [5, 7]
+        epoch_kernels = self.hyperparameters['epoch_kernels']
         for i in range(self.layers):
             best_k = 3
             for k in kernels:
                 next_arch_kernel[i] = k
                 model = self.intialize_model(next_arch_ops, next_arch_kernel)
                 self.log_model_details(model, next_arch_ops, next_arch_kernel)
-                epoch_kernels = self.hyperparameters['epoch_kernels']
                 next_arch_train_acc, next_arch_test_acc = train_test(model, epoch_kernels)
                 self.log_acc(next_arch_train_acc, next_arch_test_acc)
                 # Bigger kernel comes at a cost therefore possibility of a
