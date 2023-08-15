@@ -23,7 +23,7 @@ def get_random_model(cfg):
         layers = randrange(cfg['min_depth_layers'],
                            cfg['max_depth_layers']+cfg['depth_step'],
                            cfg['depth_step'])
-        ops = np.array([random.randint(0,1) for _ in range(layers)])
+        ops = np.array([random.randint(0,2) for _ in range(layers)])
         kernels = np.array([random.choice(kernels_list) for _ in range(layers)])
         network = {'channels': channels,
                    'layers' : layers,

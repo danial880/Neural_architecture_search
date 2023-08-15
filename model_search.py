@@ -162,21 +162,22 @@ class ModelSearch():
         epoch_opts = self.hyperparameters['epoch_opts']
         next_arch_ops = curr_arch_ops
         next_arch_kernel = curr_arch_kernel
+        ops = [1, 2]
 
         for i in range(self.layers):
-
-            next_arch_ops[i] = 1
-            model = self.intialize_model(next_arch_ops, next_arch_kernel)
-            self.log_model_details(model, next_arch_ops, next_arch_kernel)       
-            next_arch_train_acc, next_arch_test_acc = train_test(model, epoch_opts)
-            self.log_acc(next_arch_train_acc, next_arch_test_acc)
-            if next_arch_test_acc > curr_arch_test_acc:
-                curr_arch_ops = next_arch_ops
-                curr_arch_kernel = next_arch_kernel
-                curr_arch_train_acc = next_arch_train_acc
-                curr_arch_test_acc = next_arch_test_acc
-            else:
-                next_arch_ops[i] = 0
+            for o in ops:
+                next_arch_ops[i] = o
+                model = self.intialize_model(next_arch_ops, next_arch_kernel)
+                self.log_model_details(model, next_arch_ops, next_arch_kernel)       
+                next_arch_train_acc, next_arch_test_acc = train_test(model, epoch_opts)
+                self.log_acc(next_arch_train_acc, next_arch_test_acc)
+                if next_arch_test_acc > curr_arch_test_acc:
+                    curr_arch_ops = next_arch_ops
+                    curr_arch_kernel = next_arch_kernel
+                    curr_arch_train_acc = next_arch_train_acc
+                    curr_arch_test_acc = next_arch_test_acc
+                else:
+                    next_arch_ops[i] = 0
 
         logging.info('Discovered Final Operations %s', curr_arch_ops)
         logging.info('END OF OPERATION SEARCH...')

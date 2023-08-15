@@ -56,6 +56,25 @@ class SepConv(nn.Module):
         return self.op(x)
 
 
+class DilConv(nn.Module):
+    
+  def __init__(self, in_channels, out_channels, kernel_size, stride, padding,
+               dilation, affine=True):
+    super(DilConv, self).__init__()
+    self.op = nn.Sequential(
+      nn.ReLU(inplace=False),
+      nn.Conv2d(in_channels, in_channels, kernel_size=kernel_size,
+                stride=stride, padding=padding, dilation=dilation,
+                groups=in_channels, bias=False),
+      nn.Conv2d(in_channels, out_channels, kernel_size=1, padding=0,
+                bias=False),
+      nn.BatchNorm2d(out_channels, affine=affine),
+      )
+
+  def forward(self, x):
+    return self.op(x)
+
+
 class NetworkMixArch(nn.Module):
     """A neural network architecture based on MixNet.
 
@@ -116,6 +135,10 @@ class NetworkMixArch(nn.Module):
                 mix_layer = SepConv(prev_channels, curr_channels,
                                     kernel_size=kernel_sizes[i], stride=stride,
                                     padding=pad, affine=True)
+            elif mixnet_code[i] == 1:
+                mix_layer = DilConv(prev_channels, curr_channels,
+                                    kernel_size=kernel_sizes[i], stride=stride,
+                                    padding=pad, dilation=1, affine=True)
             else:
                 mix_layer = Conv(prev_channels, curr_channels,
                                  kernel_size=kernel_sizes[i],
