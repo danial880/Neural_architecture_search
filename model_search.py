@@ -64,6 +64,102 @@ class ModelSearch():
         logging.info("Best Training Accuracy %f Best Validation Accuracy %f",
                      train_acc, test_acc)
 
+    def search_depth(self, class_labels, train_test, train):
+
+        logging.info('INITIALIZING DEPTH SEARCH...')
+
+        # Initialize
+        curr_arch_ops = next_arch_ops = np.zeros((self.layers,), dtype=int)
+        curr_arch_kernel = next_arch_kernel = 3 * np.ones((self.layers,),
+                                                          dtype=int)
+        curr_arch_train_acc = next_arch_train_acc = 0.0
+        curr_arch_test_acc = next_arch_test_acc = 0.0
+        model = self.intialize_model(curr_arch_ops, curr_arch_kernel)
+        self.log_model_details(model, curr_arch_ops, curr_arch_kernel)
+        epoch_depth = self.hyperparameters['epoch_depth']
+        epoch_base = self.hyperparameters['epoch_base']
+        curr_arch_train_acc, curr_arch_test_acc = train_test(model, epoch_base)
+        self.log_acc(curr_arch_train_acc, curr_arch_test_acc)
+        # Search depth
+        diff_target_acc = self.target_acc - self.target_acc_tolerance
+        while ((curr_arch_test_acc < (diff_target_acc)) and
+               (self.layers != self.max_depth)):
+            # The possibility exists if trained for too long.
+            if (curr_arch_train_acc == 100):
+                break
+            else:
+                # prepare next candidate architecture.
+                self.layers += 1
+                next_arch_ops = np.zeros((self.layers,), dtype=int)
+                next_arch_kernel = 3 * np.ones((self.layers,), dtype=int)
+                model = self.intialize_model(next_arch_ops, next_arch_kernel)
+                utils.log_hash()
+                logging.info('Moving to Next Candidate Architecture...')
+                self.log_model_details(model, next_arch_ops, next_arch_kernel)
+                next_arch_train_acc, next_arch_test_acc = train_test(model, epoch_depth)
+                self.log_acc(next_arch_train_acc, next_arch_test_acc)
+                # As long as we get significant improvement by increasing depth
+                if (next_arch_test_acc >= curr_arch_test_acc + 0.25):
+                    # update current architecture.
+                    curr_arch_ops = next_arch_ops
+                    curr_arch_kernel = next_arch_kernel
+                    curr_arch_train_acc = next_arch_train_acc
+                    curr_arch_test_acc = next_arch_test_acc
+                    # But we still keep trying deeper candidates.
+                elif (next_arch_test_acc >= curr_arch_test_acc - 0.15):
+                    continue
+                else:
+                    break
+        # During width search lenght of curr_arch_ops and curr_arch_kernel
+        # shall not change but only channels.
+        # discovered final number of self.layers
+        f_layers = len(curr_arch_ops)
+        self.layers = f_layers
+        # discovered final number of channels
+        logging.info('Discovered Final Depth %s', f_layers)
+        logging.info('END OF DEPTH SEARCH...')
+        utils.log_hash()
+    
+    
+    def search_width(self, class_labels, train_test, train):
+        logging.info('INITIALIZING WIDTH SEARCH...')
+        f_channels = self.max_width
+        # Initialize
+        curr_arch_ops = next_arch_ops = np.zeros((self.layers,), dtype=int)
+        curr_arch_kernel = next_arch_kernel = 3 * np.ones((self.layers,),
+                                                          dtype=int)
+        curr_arch_train_acc = next_arch_train_acc = 0.0
+        curr_arch_test_acc = next_arch_test_acc = 0.0
+        model = self.intialize_model(curr_arch_ops, curr_arch_kernel)
+        self.log_model_details(model, curr_arch_ops, curr_arch_kernel)
+        epoch_width = self.hyperparameters['epoch_width']
+        epoch_base = self.hyperparameters['epoch_base']
+        curr_arch_train_acc, curr_arch_test_acc = train_test(model, epoch_base)
+        self.log_acc(curr_arch_train_acc, curr_arch_test_acc)
+        best_arch_test_acc = curr_arch_test_acc
+        while (self.channels > self.min_width):
+            
+            # Although these do not change.
+            model = self.intialize_model(curr_arch_ops, curr_arch_kernel)
+            logging.info('Moving to Next Candidate Architecture...')
+            self.log_model_details(model, curr_arch_ops, curr_arch_kernel)
+            # train and test candidate architecture.          
+            next_arch_train_acc, next_arch_test_acc = train_test(model, epoch_width)
+            self.log_acc(next_arch_train_acc, next_arch_test_acc)
+            diff_best_acc = best_arch_test_acc - self.ch_drop_tolerance
+            # prepare next candidate architecture.
+            self.channels = self.channels - self.width_resolution
+            if (next_arch_test_acc >= (diff_best_acc)):
+                curr_arch_train_acc = next_arch_train_acc
+                curr_arch_test_acc = next_arch_test_acc
+                f_channels = self.channels
+            else:
+                break
+        logging.info('Discovered Final Width %s', f_channels)
+        logging.info('END OF WIDTH SEARCH...')
+        utils.log_hash()
+    
+    
     def search_depth_and_width(self, class_labels, train_test, train):
 
         logging.info('INITIALIZING DEPTH AND WIDTH SEARCH...')
@@ -148,6 +244,50 @@ class ModelSearch():
         return curr_arch_ops, curr_arch_kernel, f_channels, f_layers, \
             curr_arch_train_acc, curr_arch_test_acc
 
+
+    def search_operations_separate(self, class_labels, train_test, train):
+
+        logging.info('RUNNING OPERATION SEARCH...')
+        curr_arch_ops = next_arch_ops = np.zeros((self.layers,), dtype=int)
+        curr_arch_kernel = next_arch_kernel = 3 * np.ones((self.layers,),
+                                                          dtype=int)
+        curr_arch_train_acc = next_arch_train_acc = 0.0
+        curr_arch_test_acc = next_arch_test_acc = 0.0
+        model = self.intialize_model(curr_arch_ops, curr_arch_kernel)
+        self.log_model_details(model, curr_arch_ops, curr_arch_kernel)
+        epoch_width = self.hyperparameters['epoch_width']
+        epoch_base = self.hyperparameters['epoch_base']
+        curr_arch_train_acc, curr_arch_test_acc = train_test(model, epoch_base)
+        self.log_acc(curr_arch_train_acc, curr_arch_test_acc)
+        best_arch_test_acc = curr_arch_test_acc
+        epoch_opts = self.hyperparameters['epoch_opts']
+        next_arch_ops = curr_arch_ops
+        next_arch_kernel = curr_arch_kernel
+        ops = [1, 2]
+
+        for i in range(self.layers):
+            for o in ops:
+                next_arch_ops[i] = o
+                model = self.intialize_model(next_arch_ops, next_arch_kernel)
+                self.log_model_details(model, next_arch_ops, next_arch_kernel)       
+                next_arch_train_acc, next_arch_test_acc = train_test(model, epoch_opts)
+                self.log_acc(next_arch_train_acc, next_arch_test_acc)
+                if next_arch_test_acc > curr_arch_test_acc:
+                    curr_arch_ops = next_arch_ops
+                    curr_arch_kernel = next_arch_kernel
+                    curr_arch_train_acc = next_arch_train_acc
+                    curr_arch_test_acc = next_arch_test_acc
+                else:
+                    next_arch_ops[i] = 0
+
+        logging.info('Discovered Final Operations %s', curr_arch_ops)
+        logging.info('END OF OPERATION SEARCH...')
+        utils.log_hash()
+        return curr_arch_ops, curr_arch_kernel, curr_arch_train_acc, \
+            curr_arch_test_acc
+
+
+
     def search_operations(self, class_labels, train_test, train,
                           model_info):
 
@@ -185,6 +325,48 @@ class ModelSearch():
         return curr_arch_ops, curr_arch_kernel, curr_arch_train_acc, \
             curr_arch_test_acc
 
+    
+    def search_kernels_separate(self, class_labels, train_test, train):
+        logging.info('RUNNING KERNEL SEARCH...')    
+        curr_arch_ops = next_arch_ops = np.zeros((self.layers,), dtype=int)
+        curr_arch_kernel = next_arch_kernel = 3 * np.ones((self.layers,),
+                                                          dtype=int)
+        curr_arch_train_acc = next_arch_train_acc = 0.0
+        curr_arch_test_acc = next_arch_test_acc = 0.0
+        model = self.intialize_model(curr_arch_ops, curr_arch_kernel)
+        self.log_model_details(model, curr_arch_ops, curr_arch_kernel)
+        epoch_width = self.hyperparameters['epoch_width']
+        epoch_base = self.hyperparameters['epoch_base']
+        curr_arch_train_acc, curr_arch_test_acc = train_test(model, epoch_base)
+        self.log_acc(curr_arch_train_acc, curr_arch_test_acc)
+        best_arch_test_acc = curr_arch_test_acc
+        next_arch_ops = curr_arch_ops
+        next_arch_kernel = curr_arch_kernel
+        kernels = [5, 7]
+        epoch_kernels = self.hyperparameters['epoch_kernels']
+        for i in range(self.layers):
+            best_k = 3
+            for k in kernels:
+                next_arch_kernel[i] = k
+                model = self.intialize_model(next_arch_ops, next_arch_kernel)
+                self.log_model_details(model, next_arch_ops, next_arch_kernel)
+                next_arch_train_acc, next_arch_test_acc = train_test(model, epoch_kernels)
+                self.log_acc(next_arch_train_acc, next_arch_test_acc)
+                # Bigger kernel comes at a cost therefore possibility of a
+                # search hyper parameter exists.
+                if (next_arch_test_acc > curr_arch_test_acc):
+                    best_k = k
+                    curr_arch_ops = next_arch_ops
+                    curr_arch_kernel[i] = k
+                    curr_arch_train_acc = next_arch_train_acc
+                    curr_arch_test_acc = next_arch_test_acc
+                else:
+                    next_arch_kernel[i] = best_k
+        logging.info('Discovered Final Kernels %s', curr_arch_kernel)
+        logging.info('END OF KERNEL SEARCH...')
+        utils.log_hash()
+    
+    
     def search_kernels(self, class_labels, train_test, train,
                        model_info):
         logging.info('RUNNING KERNEL SEARCH...')

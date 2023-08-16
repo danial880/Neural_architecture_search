@@ -35,9 +35,9 @@ hyperparameters:
   grad_clip: 5
   epoch_base: 3
   epoch_depth: 3
-  epoch_width: 4
-  epoch_opts: 5
-  epoch_kernels: 6
+  epoch_width: 5
+  epoch_opts: 3
+  epoch_kernels: 3
   cutout_length: 16
 
 paths:
