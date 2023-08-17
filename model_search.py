@@ -230,8 +230,7 @@ class ModelSearch():
             self.log_model_details(model, curr_arch_ops, curr_arch_kernel)
             # train and test candidate architecture.          
             next_arch_train_acc, next_arch_test_acc = train_test(model, epoch_width)
-            # prepare next candidate architecture.
-            self.channels = self.channels - self.width_resolution
+            
             self.log_acc(next_arch_train_acc, next_arch_test_acc)
             diff_best_acc = best_arch_test_acc - self.ch_drop_tolerance
             if (next_arch_test_acc >= (diff_best_acc)):
@@ -240,6 +239,8 @@ class ModelSearch():
                 f_channels = self.channels
             else:
                 break
+            # prepare next candidate architecture.
+            self.channels = self.channels - self.width_resolution
         logging.info('Discovered Final Width %s', f_channels)
         logging.info('END OF WIDTH SEARCH...')
         utils.log_hash()
