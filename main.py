@@ -50,41 +50,40 @@ def main(save_name):
     search_model = ModelSearch(config, class_labels)
     # Fetch the desired sub dataset.
     # Run search on the fetched sub dataset.
-#    results1 = search_model.search_depth_and_width(class_labels,
-#                                                   trainer.train_test,
-#                                                   trainer.train)
-    search_model.search_operations_separate(class_labels, trainer.train_test, trainer.train)
-#    curr_arch_ops, curr_arch_kernel, f_channels = results1[:3]
-#    f_layers, curr_arch_train_acc, curr_arch_test_acc = results1[3:]
+    results1 = search_model.search_depth_and_width(class_labels,
+                                                   trainer.train_test,
+                                                   trainer.train)
+    curr_arch_ops, curr_arch_kernel, f_channels = results1[:3]
+    f_layers, curr_arch_train_acc, curr_arch_test_acc = results1[3:]
 
-#    d_w_model_info = {'curr_arch_ops': curr_arch_ops,
-#                      'curr_arch_kernel': curr_arch_kernel,
-#                      'curr_arch_train_acc': curr_arch_train_acc,
-#                      'curr_arch_test_acc': curr_arch_test_acc,
-#                      'f_channels': f_channels,
-#                      'f_layers': f_layers}
-#    results2 = search_model.search_operations_and_kernels(d_w_model_info,
-#                                                          class_labels,
-#                                                          trainer.train_test,
-#                                                          trainer.train)
-#    curr_arch_ops, curr_arch_kernel = results2[:2]
-#    curr_arch_train_acc, curr_arch_test_acc = results2[2:]
+    d_w_model_info = {'curr_arch_ops': curr_arch_ops,
+                      'curr_arch_kernel': curr_arch_kernel,
+                      'curr_arch_train_acc': curr_arch_train_acc,
+                      'curr_arch_test_acc': curr_arch_test_acc,
+                      'f_channels': f_channels,
+                      'f_layers': f_layers}
+    results2 = search_model.search_operations_and_kernels(d_w_model_info,
+                                                          class_labels,
+                                                          trainer.train_test,
+                                                          trainer.train)
+    curr_arch_ops, curr_arch_kernel = results2[:2]
+    curr_arch_train_acc, curr_arch_test_acc = results2[2:]
 
-#    logging.info('END OF SEARCH...')
-#    utils.log_hash()
-#    model = NetworkMixArch(f_channels, len(np.array(class_labels)), f_layers,
-#                           curr_arch_ops, curr_arch_kernel,
-#                           config['hyperparameters']['input_shape'])
-#    model = model.cuda()
-#    logging.info('FINAL DISCOVERED ARCHITECTURE DETAILS:')
-#    logging.info("Model Depth %s Model Width %s", f_layers, f_channels)
-#    logging.info("Model Layers %s Model Kernels %s", curr_arch_ops,
-#                 curr_arch_kernel)
-#    logging.info("Model Parameters = %fMB",
-#                 utils.count_parameters_in_MB(model))
-#    logging.info("Training Accuracy %f Validation Accuracy %f",
-#                 curr_arch_train_acc, curr_arch_test_acc)
-#    logging.info('Final model summary: %s', model)
+    logging.info('END OF SEARCH...')
+    utils.log_hash()
+    model = NetworkMixArch(f_channels, len(np.array(class_labels)), f_layers,
+                           curr_arch_ops, curr_arch_kernel,
+                           config['hyperparameters']['input_shape'])
+    model = model.cuda()
+    logging.info('FINAL DISCOVERED ARCHITECTURE DETAILS:')
+    logging.info("Model Depth %s Model Width %s", f_layers, f_channels)
+    logging.info("Model Layers %s Model Kernels %s", curr_arch_ops,
+                 curr_arch_kernel)
+    logging.info("Model Parameters = %fMB",
+                 utils.count_parameters_in_MB(model))
+    logging.info("Training Accuracy %f Validation Accuracy %f",
+                 curr_arch_train_acc, curr_arch_test_acc)
+    logging.info('Final model summary: %s', model)
 
 
 if __name__ == '__main__':

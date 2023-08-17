@@ -33,9 +33,9 @@ hyperparameters:
   weight_decay: 3e-4
   momentum: 0.9
   grad_clip: 5
-  epoch_base: 3
-  epoch_depth: 3
-  epoch_width: 5
+  epoch_base: 1
+  epoch_depth: 1
+  epoch_width: 1
   epoch_opts: 3
   epoch_kernels: 3
   cutout_length: 16
