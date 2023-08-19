@@ -1,4 +1,4 @@
-dataset_to_run: 'DTD'
+dataset_to_run: 'CIFAR10'
 
 device:
   gpu: 0
@@ -33,11 +33,11 @@ hyperparameters:
   weight_decay: 3e-4
   momentum: 0.9
   grad_clip: 5
-  epoch_base: 3
-  epoch_depth: 3
-  epoch_width: 5
-  epoch_opts: 2
-  epoch_kernels: 2
+  epoch_base: 1
+  epoch_depth: 1
+  epoch_width: 3
+  epoch_opts: 5
+  epoch_kernels: 5
   cutout_length: 16
 
 paths:
@@ -143,7 +143,7 @@ datasets:
     std: [0.229, 0.224, 0.225]
     train: ["datasets.Food101(root=cfg['paths']['data_dir'], split='train',
                               download=True, transform=train_transform)"]
-    test: ["datasets.Food101(root=cfg['paths']['data_dir'], split='val',
+    test: ["datasets.Food101(root=cfg['paths']['data_dir'], split='test',
                              download=True, transform=test_transform)"]
     classes: ['macarons', 'french_toast', 'lobster_bisque', 'prime_rib',
               'pork_chop', 'guacamole', 'baby_back_ribs', 'mussels',

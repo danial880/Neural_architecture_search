@@ -216,13 +216,20 @@ class ModelSearch():
         f_channels = self.max_width
         logging.info('Discovered Final Depth %s', f_layers)
         logging.info('END OF DEPTH SEARCH...')
-        best_arch_test_acc = curr_arch_test_acc
         utils.log_hash()
         logging.info('RUNNING WIDTH SEARCH NOW...')
         epoch_width = self.hyperparameters['epoch_width']
+        # train current architecture with epoch_width
+        model = self.intialize_model(curr_arch_ops, curr_arch_kernel)
+        next_arch_train_acc, next_arch_test_acc = train_test(model, epoch_width)
+        self.log_acc(next_arch_train_acc, next_arch_test_acc)
+        if (next_arch_test_acc > curr_arch_test_acc):
+            curr_arch_train_acc = next_arch_train_acc
+            curr_arch_test_acc = next_arch_test_acc
+        best_arch_test_acc = curr_arch_test_acc
         while (self.channels > self.min_width):
-           
-            
+            self.channels = self.channels - self.width_resolution
+            utils.log_hash()
             # Although these do not change.
             #print("\n\n\n\nsafsadsadsa = ",curr_arch_ops, curr_arch_kernel)
             model = self.intialize_model(curr_arch_ops, curr_arch_kernel)
@@ -240,7 +247,7 @@ class ModelSearch():
             else:
                 break
             # prepare next candidate architecture.
-            self.channels = self.channels - self.width_resolution
+            
         logging.info('Discovered Final Width %s', f_channels)
         logging.info('END OF WIDTH SEARCH...')
         utils.log_hash()
@@ -276,7 +283,7 @@ class ModelSearch():
                 next_arch_train_acc, next_arch_test_acc = train_test(model, epoch_opts)
                 self.log_acc(next_arch_train_acc, next_arch_test_acc)
                 if next_arch_test_acc > curr_arch_test_acc:
-                    curr_arch_ops = next_arch_ops
+                    curr_arch_ops[i] = o
                     curr_arch_kernel = next_arch_kernel
                     curr_arch_train_acc = next_arch_train_acc
                     curr_arch_test_acc = next_arch_test_acc
@@ -306,24 +313,34 @@ class ModelSearch():
         next_arch_ops = curr_arch_ops
         next_arch_kernel = curr_arch_kernel
         ops = [1, 2]
-
+        # train current model for epoch_opts
+        model = self.intialize_model(next_arch_ops, next_arch_kernel)
+        self.log_model_details(model, next_arch_ops, next_arch_kernel)       
+        next_arch_train_acc, next_arch_test_acc = train_test(model, epoch_opts)
+        if next_arch_test_acc > curr_arch_test_acc:
+            curr_arch_train_acc = next_arch_train_acc
+            curr_arch_test_acc = next_arch_test_acc
+        #best_ops = []
         for i in range(self.layers):
             for o in ops:
-                
+                utils.log_hash()
+                next_arch_ops[i] = o
                 model = self.intialize_model(next_arch_ops, next_arch_kernel)
                 self.log_model_details(model, next_arch_ops, next_arch_kernel)       
                 next_arch_train_acc, next_arch_test_acc = train_test(model, epoch_opts)
-                
+                logging.info('Current Test Accuracy for loop =  %s', curr_arch_test_acc)
                 self.log_acc(next_arch_train_acc, next_arch_test_acc)
                 if next_arch_test_acc > curr_arch_test_acc:
-                    curr_arch_ops = next_arch_ops
+                    logging.info('Current Test Accuracy inside if =  %s', curr_arch_test_acc)
+                    logging.info('Current ops inside if =  %s', curr_arch_ops)
+                    curr_arch_ops[i] = o
+                    #best_ops.append(o)
                     curr_arch_kernel = next_arch_kernel
                     curr_arch_train_acc = next_arch_train_acc
                     curr_arch_test_acc = next_arch_test_acc
                 else:
                     next_arch_ops[i] = 0
-                next_arch_ops[i] = o
-
+                logging.info('Current ops  =  %s', curr_arch_ops)
         logging.info('Discovered Final Operations %s', curr_arch_ops)
         logging.info('END OF OPERATION SEARCH...')
         utils.log_hash()
@@ -385,10 +402,18 @@ class ModelSearch():
         next_arch_kernel = curr_arch_kernel
         kernels = [5, 7]
         epoch_kernels = self.hyperparameters['epoch_kernels']
+        # train current model for epoch_kernels
+        model = self.intialize_model(next_arch_ops, next_arch_kernel)
+        self.log_model_details(model, next_arch_ops, next_arch_kernel)
+        next_arch_train_acc, next_arch_test_acc = train_test(model, epoch_kernels)
+        if (next_arch_test_acc > curr_arch_test_acc):
+            curr_arch_train_acc = next_arch_train_acc
+            curr_arch_test_acc = next_arch_test_acc
         for i in range(self.layers):
             best_k = 3
             for k in kernels:
-                
+                utils.log_hash()
+                next_arch_kernel[i] = k
                 model = self.intialize_model(next_arch_ops, next_arch_kernel)
                 self.log_model_details(model, next_arch_ops, next_arch_kernel)
                 next_arch_train_acc, next_arch_test_acc = train_test(model, epoch_kernels)
@@ -404,7 +429,7 @@ class ModelSearch():
                     curr_arch_test_acc = next_arch_test_acc
                 else:
                     next_arch_kernel[i] = best_k
-                next_arch_kernel[i] = k
+                
         logging.info('Discovered Final Kernels %s', curr_arch_kernel)
         logging.info('END OF KERNEL SEARCH...')
         utils.log_hash()
