@@ -1,4 +1,4 @@
-dataset_to_run: 'CIFAR10'
+dataset_to_run: 'CIFAR100'
 
 device:
   gpu: 0

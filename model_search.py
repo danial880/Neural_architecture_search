@@ -322,6 +322,7 @@ class ModelSearch():
             curr_arch_test_acc = next_arch_test_acc
         #best_ops = []
         for i in range(self.layers):
+            best_ops = 0
             for o in ops:
                 utils.log_hash()
                 next_arch_ops[i] = o
@@ -331,15 +332,16 @@ class ModelSearch():
                 logging.info('Current Test Accuracy for loop =  %s', curr_arch_test_acc)
                 self.log_acc(next_arch_train_acc, next_arch_test_acc)
                 if next_arch_test_acc > curr_arch_test_acc:
-                    logging.info('Current Test Accuracy inside if =  %s', curr_arch_test_acc)
-                    logging.info('Current ops inside if =  %s', curr_arch_ops)
+                    best_ops = o
                     curr_arch_ops[i] = o
                     #best_ops.append(o)
                     curr_arch_kernel = next_arch_kernel
                     curr_arch_train_acc = next_arch_train_acc
                     curr_arch_test_acc = next_arch_test_acc
+                    logging.info('Current Test Accuracy inside if =  %s', curr_arch_test_acc)
+                    logging.info('Current ops inside if =  %s', curr_arch_ops)
                 else:
-                    next_arch_ops[i] = 0
+                    next_arch_ops[i] = best_ops
                 logging.info('Current ops  =  %s', curr_arch_ops)
         logging.info('Discovered Final Operations %s', curr_arch_ops)
         logging.info('END OF OPERATION SEARCH...')
