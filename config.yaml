@@ -1,4 +1,4 @@
-dataset_to_run: 'CIFAR10'
+dataset_to_run: 'KMNIST'
 
 device:
   gpu: 0
@@ -6,7 +6,7 @@ device:
 flags:
   auto_augment: False
   cutout: False
-  resume: True
+  resume: False
   save: True
 
 logging:
@@ -26,19 +26,20 @@ search_parameters:
 
 hyperparameters:
   seed: 42
-  input_shape: 32
+  input_shape: 28
   valid_size: 0
   batch_size: 64
   learning_rate: 0.025
   weight_decay: 3e-4
   momentum: 0.9
   grad_clip: 5
-  epochs: 80
+  epochs: 1
+  grayscale: True
   cutout_length: 16
 
 paths:
   data_dir: './data'
-  resume_checkpoint: './Search-hard-20230523-203749/checkpoint.pt'
+  resume_checkpoint: './Search-hard-20230821-133043/checkpoint.pt'
 
 random_network_gen:
   num_net: 10
@@ -82,6 +83,50 @@ datasets:
     classes: ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog',
               'horse', 'ship', 'truck']
 
+  EMNIST:
+    width: 28
+    height: 28
+    channels: 1
+    mean: [0.1751]
+    std: [0.3332]
+    train: ["datasets.EMNIST(root=cfg['paths']['data_dir'], train=True,
+                            download=True, split='balanced',
+                            transform=train_transform)"]
+    test: ["datasets.EMNIST(root=cfg['paths']['data_dir'], train=False,
+                            download=True, split='balanced',
+                            transform=test_transform)"]
+    classes: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+              'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
+              'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+              'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'd', 'e',
+              'f', 'g', 'h', 'n', 'q', 'r', 't']
+
+  FashionMNIST:
+    width: 28
+    height: 28
+    channels: 1
+    mean: [0.2860402]
+    std: [0.3530236]
+    train: ["datasets.FashionMNIST(root=cfg['paths']['data_dir'], train=True,
+                            download=True, transform=train_transform)"]
+    test: ["datasets.FashionMNIST(root=cfg['paths']['data_dir'], train=False,
+                            download=True, transform=test_transform)"]
+    classes: ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
+              'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
+  KMNIST:
+    width: 28
+    height: 28
+    channels: 1
+    mean: [0.19036119]
+    std: [0.34719803]
+    train: ["datasets.KMNIST(root=cfg['paths']['data_dir'], train=True,
+                            download=True, transform=train_transform)"]
+    test: ["datasets.KMNIST(root=cfg['paths']['data_dir'], train=False,
+                            download=True, transform=test_transform)"]
+    classes: ['o', 'ki', 'su', 'tsu', 'na', 'ha', 'ma', 'ya', 're', 'wo']
+
+
+  
   DTD:
     width: 32
     height: 32
@@ -139,7 +184,7 @@ datasets:
     std: [0.229, 0.224, 0.225]
     train: ["datasets.Food101(root=cfg['paths']['data_dir'], split='train',
                               download=True, transform=train_transform)"]
-    test: ["datasets.Food101(root=cfg['paths']['data_dir'], split='val',
+    test: ["datasets.Food101(root=cfg['paths']['data_dir'], split='test',
                              download=True, transform=test_transform)"]
     classes: ['macarons', 'french_toast', 'lobster_bisque', 'prime_rib',
               'pork_chop', 'guacamole', 'baby_back_ribs', 'mussels',

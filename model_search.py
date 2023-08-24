@@ -42,10 +42,12 @@ class ModelSearch():
         self.channels = self.max_width
         self.layers = self.min_depth
         self.input_shape = config['hyperparameters']['input_shape']
+        self.grayscale = config['hyperparameters']['grayscale']
 
     def intialize_model(self, arch_ops, arch_kernel):
         model = NetworkMixArch(self.channels, self.CLASSES, self.layers,
-                               arch_ops, arch_kernel, self.input_shape)
+                               arch_ops, arch_kernel, self.input_shape,
+                               self.grayscale)
         model = model.cuda()
         return model
 
@@ -55,8 +57,11 @@ class ModelSearch():
                      self.channels)
         logging.info("Model self.layers %s Model Kernels %s", arch_ops,
                      arch_kernel)
-        logging.info("Model Parameters = %fMB",
+        logging.info("Model Parameters in MB = %f",
                      utils.count_parameters_in_MB(model))
+        logging.info("Flops = %s", utils.calculate_flops(model,
+                                                             self.grayscale,
+                                                             self.input_shape))
         logging.info('Training Model...')
 
     def log_acc(self, train_acc, test_acc):
@@ -121,7 +126,7 @@ class ModelSearch():
         utils.log_hash()
         logging.info('RUNNING WIDTH SEARCH NOW...')
         while (self.channels > self.min_width):
-            # prepare next candidate architecture.
+            # prepare next candidate architecture.emnist
             self.channels = self.channels - self.width_resolution
             # Although these do not change.
             #print("\n\n\n\nsafsadsadsa = ",curr_arch_ops, curr_arch_kernel)

@@ -4,6 +4,8 @@ import torch
 import shutil
 import logging
 import numpy as np
+from thop import profile
+from thop import clever_format
 from torchvision import datasets
 from torchvision import transforms
 from torchvision.transforms import CenterCrop as CC
@@ -121,6 +123,17 @@ def load_yaml(yaml_file='config.yaml'):
     with open(yaml_file, 'r') as f:
         data = yaml.safe_load(f)
     return data
+
+
+def calculate_flops(model, grayscale=False, size=32):
+    if grayscale:
+        input_tensor = torch.randn(1, 1, size, size).cuda()
+    else:
+        input_tensor = torch.randn(1, 3, size, size).cuda()
+    print('input_tensor = ',input_tensor.shape)
+    flops, params = profile(model, inputs=(input_tensor, ))
+    flops, params = clever_format([flops, params], "%.3f")
+    return flops
 
 
 def data_load_transforms(cfg):

@@ -70,7 +70,7 @@ class NetworkMixArch(nn.Module):
     """
 
     def __init__(self, channels, num_classes, layers, mixnet_code,
-                 kernel_sizes, image_size):
+                 kernel_sizes, image_size, grayscale):
         super(NetworkMixArch, self).__init__()
         self._layers = layers
         # Set stride to 2 for first layers based on image size
@@ -78,8 +78,12 @@ class NetworkMixArch(nn.Module):
         for i in range(image_size // 64):
             strides[i] = 2
         # Define stem layers
+        if grayscale:
+            start_layer = 1
+        else:
+            start_layer = 3
         self.stem = nn.Sequential(
-            nn.Conv2d(3, channels // 2, kernel_size=3, stride=strides[0],
+            nn.Conv2d(start_layer, channels // 2, kernel_size=3, stride=strides[0],
                       padding=1, bias=False),
             nn.BatchNorm2d(channels // 2),
             nn.ReLU(inplace=True),

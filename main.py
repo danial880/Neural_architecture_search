@@ -33,6 +33,7 @@ def main(save_name):
     config = utils.load_yaml()
     device = config['device']['gpu']
     seed = config['hyperparameters']['seed']
+    grayscale = config['hyperparameters']['grayscale']
     np.random.seed(seed)
     torch.cuda.set_device(device)
     cudnn.benchmark = True
@@ -43,6 +44,7 @@ def main(save_name):
     logging.info('GPU Device = %d' % device)
     logging.info("Hyperparameters = %s", config['hyperparameters'])
     logging.info("Search Parameters = %s", config['search_parameters'])
+    
     config['flags']['resume'] = False
     trainer = Train(config, save_name)
     # Log sub dataset under consideration.
@@ -73,7 +75,7 @@ def main(save_name):
     utils.log_hash()
     model = NetworkMixArch(f_channels, len(np.array(class_labels)), f_layers,
                            curr_arch_ops, curr_arch_kernel,
-                           config['hyperparameters']['input_shape'])
+                           config['hyperparameters']['input_shape'], grayscale)
     model = model.cuda()
     logging.info('FINAL DISCOVERED ARCHITECTURE DETAILS:')
     logging.info("Model Depth %s Model Width %s", f_layers, f_channels)
