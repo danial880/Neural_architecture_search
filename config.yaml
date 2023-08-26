@@ -1,4 +1,4 @@
-dataset_to_run: 'KMNIST'
+dataset_to_run: 'EuroSAT'
 
 device:
   gpu: 0
@@ -33,8 +33,8 @@ hyperparameters:
   weight_decay: 3e-4
   momentum: 0.9
   grad_clip: 5
-  epochs: 1
-  grayscale: True
+  epochs: 3
+  grayscale: False
   cutout_length: 16
 
 paths:
@@ -119,12 +119,24 @@ datasets:
     channels: 1
     mean: [0.19036119]
     std: [0.34719803]
-    train: ["datasets.KMNIST(root=cfg['paths']['data_dir'], train=True,
+    train: ["datasets.KMNIST(root=cfg[import ssl
+ssl._create_default_https_context = ssl._create_unverified_context'paths']['data_dir'], train=True,
                             download=True, transform=train_transform)"]
     test: ["datasets.KMNIST(root=cfg['paths']['data_dir'], train=False,
                             download=True, transform=test_transform)"]
     classes: ['o', 'ki', 'su', 'tsu', 'na', 'ha', 'ma', 'ya', 're', 'wo']
 
+  EuroSAT:
+    width: 64
+    height: 64
+    channels: 3
+    mean: [0.4643, 0.5153, 0.2951]
+    std: [0.2112, 0.2087, 0.1691]
+    train: ["datasets.EuroSAT(root=cfg['paths']['data_dir'],
+                              transform=train_transform, download=True)"]
+    classes: ['AnnualCrop', 'Forest', 'HerbaceousVegetation', 'Highway',
+              'Industrial', 'Pasture', 'PermanentCrop', 'Residential', 'River',
+              'SeaLake']
 
   
   DTD:

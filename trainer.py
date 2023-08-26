@@ -47,6 +47,8 @@ class Train():
             A list of class labels for the dataset.
         """
         train_data, test_data, total_classes = utils.data_load_transforms(self.config)
+        dataset_to_run = self.config['dataset_to_run']
+        
         # obtain training indices that will be used for validation
         num_train = len(train_data)
         indices = list(range(num_train))
@@ -58,9 +60,14 @@ class Train():
         valid_sampler = SubsetRandomSampler(valid_idx)
         self.train_queue = DataLoader(train_data, batch_size=self.batch_size,
                                       sampler=train_sampler, num_workers=2)
-        self.valid_queue = DataLoader(test_data, batch_size=self.batch_size,
+        self.valid_queue = DataLoader(train_data, batch_size=self.batch_size,
                                       sampler=valid_sampler, num_workers=2)
-        self.test_queue = DataLoader(test_data, batch_size=self.batch_size,
+        if dataset_to_run == "EuroSAT":
+            self.test_queue = DataLoader(train_data, batch_size=self.batch_size,
+                                     shuffle=False, pin_memory=True,
+                                     num_workers=2)
+        else:
+            self.test_queue = DataLoader(test_data, batch_size=self.batch_size,
                                      shuffle=False, pin_memory=True,
                                      num_workers=2)
         # get some random training images

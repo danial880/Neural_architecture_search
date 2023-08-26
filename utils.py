@@ -8,9 +8,12 @@ from thop import profile
 from thop import clever_format
 from torchvision import datasets
 from torchvision import transforms
+from torch.utils.data import random_split
 from torchvision.transforms import CenterCrop as CC
 from torchvision.transforms import ColorJitter as CJ
 from torchvision.transforms import RandomResizedCrop as RRC
+from torch.utils.data.sampler import SubsetRandomSampler
+from torch.utils.data import DataLoader
 
 
 class AvgrageMeter(object):
@@ -156,6 +159,9 @@ def data_load_transforms(cfg):
                                          CC(input_shape),
                                          transforms.ToTensor(), normalize])
     train_data = eval(dataset['train'][0])
-    test_data = eval(dataset['test'][0])
     total_classes = dataset['classes']
+    if dataset_to_run == "EuroSAT":     
+        test_data = None
+        return train_data, test_data, total_classes   
+    test_data = eval(dataset['test'][0])
     return train_data, test_data, total_classes

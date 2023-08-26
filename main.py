@@ -11,7 +11,8 @@ from trainer import Train
 from torch.backends import cudnn
 from model_search import ModelSearch
 from network_mix import NetworkMixArch
-
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
 
 def setup_start(config):
     exp_name = config['logging']['exp_name']
