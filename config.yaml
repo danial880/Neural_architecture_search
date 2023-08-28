@@ -1,4 +1,4 @@
-dataset_to_run: 'EuroSAT'
+dataset_to_run: 'KMNIST'
 
 device:
   gpu: 0
@@ -34,7 +34,7 @@ hyperparameters:
   momentum: 0.9
   grad_clip: 5
   epochs: 3
-  grayscale: False
+  grayscale: True
   cutout_length: 16
 
 paths:
@@ -119,8 +119,7 @@ datasets:
     channels: 1
     mean: [0.19036119]
     std: [0.34719803]
-    train: ["datasets.KMNIST(root=cfg[import ssl
-ssl._create_default_https_context = ssl._create_unverified_context'paths']['data_dir'], train=True,
+    train: ["datasets.KMNIST(root=cfg['paths']['data_dir'], train=True,
                             download=True, transform=train_transform)"]
     test: ["datasets.KMNIST(root=cfg['paths']['data_dir'], train=False,
                             download=True, transform=test_transform)"]
