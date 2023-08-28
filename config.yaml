@@ -5,12 +5,12 @@ device:
 
 flags:
   auto_augment: False
-  cutout: False
+  cutout: True
   resume: False
   save: True
 
 logging:
-  report_freq: 10
+  report_freq: 1
 
 search_parameters:
   target_acc: 99
@@ -18,9 +18,9 @@ search_parameters:
   ch_drop_tolerance: 0.5
   min_width_channels: 16 
   max_width_channels: 64
-  width_resolution: 16
+  width_resolution: 4
   min_depth_layers: 5
-  max_depth_layers: 15
+  max_depth_layers: 20
 
 hyperparameters:
   seed: 42
@@ -79,6 +79,35 @@ datasets:
     classes: ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog',
               'horse', 'ship', 'truck']
 
+  CIFAR100:
+    width: 32
+    height: 32
+    channels: 3
+    mean: [0.5071, 0.4865, 0.4409]
+    std: [0.2673, 0.2564, 0.2762]
+    train: ["datasets.CIFAR100(root=cfg['paths']['data_dir'], train=True,
+             download=True, transform=train_transform)"]
+    test: ["datasets.CIFAR100(root=cfg['paths']['data_dir'], train=False,
+            download=True, transform=test_transform)"]
+    classes:  ['apple', 'aquarium_fish', 'baby', 'bear', 'beaver', 'bed',
+               'bee', 'beetle', 'bicycle', 'bottle', 'bowl', 'boy', 'bridge',
+               'bus', 'butterfly', 'camel', 'can', 'castle', 'caterpillar',
+               'cattle', 'chair', 'chimpanzee', 'clock', 'cloud', 'cockroach',
+               'couch', 'crab', 'crocodile', 'cup', 'dinosaur', 'dolphin',
+               'elephant', 'flatfish', 'forest', 'fox', 'girl', 'hamster',
+               'house', 'kangaroo', 'keyboard', 'lamp', 'lawn_mower',
+               'leopard', 'lion', 'lizard', 'lobster', 'man', 'maple_tree',
+               'motorcycle', 'mountain', 'mouse', 'mushroom', 'oak_tree',
+               'orange', 'orchid', 'otter', 'palm_tree', 'pear',
+               'pickup_truck', 'pine_tree', 'plain', 'plate', 'poppy',
+               'porcupine', 'possum', 'rabbit', 'raccoon', 'ray', 'road',
+               'rocket', 'rose', 'sea', 'seal', 'shark', 'shrew', 'skunk',
+               'skyscraper', 'snail', 'snake', 'spider', 'squirrel',
+               'streetcar', 'sunflower', 'sweet_pepper', 'table', 'tank',
+               'telephone', 'television', 'tiger', 'tractor', 'train', 'trout',
+               'tulip', 'turtle', 'wardrobe', 'whale', 'willow_tree', 'wolf',
+               'woman', 'worm']
+ 
   EMNIST:
     width: 28
     height: 28
@@ -129,7 +158,7 @@ datasets:
     std: [0.2112, 0.2087, 0.1691]
     train: ["datasets.EuroSAT(root=cfg['paths']['data_dir'],
                               transform=train_transform, download=True)"]
-    classes: ['AnnualCrop', 'Forest', 'HerbaceousVegetation', 'Highway',
+    classes: ['AannualCrop', 'Forest', 'HerbaceousVegetation', 'Highway',
               'Industrial', 'Pasture', 'PermanentCrop', 'Residential', 'River',
               'SeaLake']
 
@@ -154,34 +183,7 @@ datasets:
               'studded', 'swirly', 'veined', 'waffled', 'woven', 'wrinkled',
               'zigzagged','homogeneous', 'non-homogeneous']
 
-  CIFAR100:
-    width: 32
-    height: 32
-    channels: 3
-    mean: [0.5071, 0.4865, 0.4409]
-    std: [0.2673, 0.2564, 0.2762]
-    train: ["datasets.CIFAR100(root=cfg['paths']['data_dir'], train=True,
-             download=True, transform=train_transform)"]
-    test: ["datasets.CIFAR100(root=cfg['paths']['data_dir'], train=False,
-            download=True, transform=test_transform)"]
-    classes:  ['apple', 'aquarium_fish', 'baby', 'bear', 'beaver', 'bed',
-               'bee', 'beetle', 'bicycle', 'bottle', 'bowl', 'boy', 'bridge',
-               'bus', 'butterfly', 'camel', 'can', 'castle', 'caterpillar',
-               'cattle', 'chair', 'chimpanzee', 'clock', 'cloud', 'cockroach',
-               'couch', 'crab', 'crocodile', 'cup', 'dinosaur', 'dolphin',
-               'elephant', 'flatfish', 'forest', 'fox', 'girl', 'hamster',
-               'house', 'kangaroo', 'keyboard', 'lamp', 'lawn_mower',
-               'leopard', 'lion', 'lizard', 'lobster', 'man', 'maple_tree',
-               'motorcycle', 'mountain', 'mouse', 'mushroom', 'oak_tree',
-               'orange', 'orchid', 'otter', 'palm_tree', 'pear',
-               'pickup_truck', 'pine_tree', 'plain', 'plate', 'poppy',
-               'porcupine', 'possum', 'rabbit', 'raccoon', 'ray', 'road',
-               'rocket', 'rose', 'sea', 'seal', 'shark', 'shrew', 'skunk',
-               'skyscraper', 'snail', 'snake', 'spider', 'squirrel',
-               'streetcar', 'sunflower', 'sweet_pepper', 'table', 'tank',
-               'telephone', 'television', 'tiger', 'tractor', 'train', 'trout',
-               'tulip', 'turtle', 'wardrobe', 'whale', 'willow_tree', 'wolf',
-               'woman', 'worm']
+  
 
   Food101:
     width: 224

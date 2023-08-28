@@ -155,7 +155,7 @@ def calculate_flops(model, grayscale=False, size=32):
     flops, params = profile(model, inputs=(input_tensor, ))
     flops, params = clever_format([flops, params], "%.3f")
     return flops
-
+a
 
 def data_load_transforms(cfg):
     dataset_to_run = cfg['dataset_to_run']
