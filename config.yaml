@@ -1,4 +1,4 @@
-dataset_to_run: 'KMNIST'
+dataset_to_run: 'DTD'
 
 device:
   gpu: 0
@@ -11,8 +11,6 @@ flags:
 
 logging:
   report_freq: 10
-  txt_name: 'search_log.txt'
-  exp_name: 'hard'
 
 search_parameters:
   target_acc: 99
@@ -26,7 +24,6 @@ search_parameters:
 
 hyperparameters:
   seed: 42
-  input_shape: 28
   valid_size: 0
   batch_size: 64
   learning_rate: 0.025
@@ -34,7 +31,6 @@ hyperparameters:
   momentum: 0.9
   grad_clip: 5
   epochs: 3
-  grayscale: True
   cutout_length: 16
 
 paths:
@@ -78,7 +74,7 @@ datasets:
     std: [0.24703233, 0.24348505, 0.26158768]
     train: ["datasets.CIFAR10(root=cfg['paths']['data_dir'], train=True,
                               download=True, transform=train_transform)"]
-    test: ["datasets.CIFAR10(root=cfg['paths']['data_dir'], train=False,
+    test: ["datasets.CIFAR10(root=cfgi['paths']['data_dir'], train=False,
                              download=True, transform=test_transform)"]
     classes: ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog',
               'horse', 'ship', 'truck']
@@ -139,8 +135,8 @@ datasets:
 
   
   DTD:
-    width: 32
-    height: 32
+    width: 224
+    height: 224
     channels: 3
     mean: [0.1913, 0.0761, 0.0831]
     std: [2.5510, 2.5276, 2.5915]

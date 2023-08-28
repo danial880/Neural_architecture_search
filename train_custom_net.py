@@ -35,7 +35,8 @@ def get_custom_model(cfg, name):
     class_labels = trainer.get_desired_dataset(logging)
     # Log sub dataset under consideration.
     # intialize model
-    input_shape = cfg['hyperparameters']['input_shape']
+    input_shape = utils.get_input_shape(cfg['dataset_to_run'])
+    grayscale = utils.get_grayscale(config['dataset_to_run'])
     channels = cfg['custom_network']['channels']
     layers = cfg['custom_network']['layers']
     ops = cfg['custom_network']['ops']
@@ -44,7 +45,7 @@ def get_custom_model(cfg, name):
                  channels, layers)
     logging.info("Model Ops %s \nModel Kernels %s", ops, kernels)
     model = NetworkMixArch(channels, len(class_labels), layers, ops, kernels,
-                           input_shape)
+                           input_shape, grayscale)
     model = model.cuda()
     return model, trainer
     
@@ -59,9 +60,9 @@ def train_custom(cfg, name):
 if __name__ == "__main__":
     # create save directory
     config = utils.load_yaml()
-    exp_name = config['logging']['exp_name']
-    txt_name = config['logging']['txt_name']
-    save_name = 'Search-{}-{}'.format(exp_name, strftime("%Y%m%d-%H%M%S"))
+    exp_name = config['dataset_to_run']
+    txt_name = exp_name + '.txt'
+    save_name = 'Train-{}-{}'.format(exp_name, strftime("%Y%m%d-%H%M%S"))
     utils.create_exp_dir(save_name, scripts_to_save=glob.glob('*.py'))
     # logging
     log_format = '%(asctime)s %(message)s'

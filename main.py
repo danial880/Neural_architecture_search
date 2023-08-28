@@ -15,8 +15,8 @@ import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 
 def setup_start(config):
-    exp_name = config['logging']['exp_name']
-    txt_name = config['logging']['txt_name']
+    exp_name = config['dataset_to_run']
+    txt_name = exp_name + '.txt'
     save_name = 'Search-{}-{}'.format(exp_name, strftime("%Y%m%d-%H%M%S"))
     utils.create_exp_dir(save_name, scripts_to_save=glob.glob('*.py'))
     log_format = '%(asctime)s %(message)s'
@@ -34,7 +34,8 @@ def main(save_name):
     config = utils.load_yaml()
     device = config['device']['gpu']
     seed = config['hyperparameters']['seed']
-    grayscale = config['hyperparameters']['grayscale']
+    
+    grayscale = utils.get_grayscale(config['dataset_to_run'])
     np.random.seed(seed)
     torch.cuda.set_device(device)
     cudnn.benchmark = True
@@ -74,9 +75,10 @@ def main(save_name):
 
     logging.info('END OF SEARCH...')
     utils.log_hash()
+    input_shape = utils.get_input_shape(config['dataset_to_run'])
     model = NetworkMixArch(f_channels, len(np.array(class_labels)), f_layers,
-                           curr_arch_ops, curr_arch_kernel,
-                           config['hyperparameters']['input_shape'], grayscale)
+                           curr_arch_ops, curr_arch_kernel, input_shape,
+                           grayscale)
     model = model.cuda()
     logging.info('FINAL DISCOVERED ARCHITECTURE DETAILS:')
     logging.info("Model Depth %s Model Width %s", f_layers, f_channels)

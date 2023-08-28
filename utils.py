@@ -52,6 +52,24 @@ class Cutout(object):
         img *= mask
         return img
 
+def get_grayscale(dataset):
+    grayscale = ['EMNIST', 'FashionMNIST', 'KMNIST']
+    if dataset in grayscale:
+        return True
+    else:
+        return False
+
+def get_input_shape(dataset):
+    shape = {
+             '28' : ["KMNIST", "EMNIST", "FashionMNIST"],
+             '32' : ["CIFAR10", "CIFAR100","STL10"],
+             '64' : ["EuroSAT"],
+             '224' : ["DTD", "Food101", "Flowers102"]
+         }
+    for key in shape.keys():
+        if dataset in shape[key]:
+            return int(key)
+
 
 def accuracy(output, target, topk=(1,)):
     maxk = max(topk)
@@ -143,7 +161,7 @@ def data_load_transforms(cfg):
     dataset_to_run = cfg['dataset_to_run']
     dataset = cfg['datasets'][dataset_to_run]
     #print('\n\ndataset keys =  ', dataset['train'][0])
-    input_shape = cfg['hyperparameters']['input_shape']
+    input_shape = get_input_shape(dataset_to_run)
     cutout = cfg['flags']['cutout']
     cutout_length = cfg['hyperparameters']['cutout_length']
     # Find mean and std for given dataset

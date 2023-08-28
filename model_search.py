@@ -41,8 +41,9 @@ class ModelSearch():
         # We start with max width but with min depth.
         self.channels = self.max_width
         self.layers = self.min_depth
-        self.input_shape = config['hyperparameters']['input_shape']
-        self.grayscale = config['hyperparameters']['grayscale']
+        self.input_shape = utils.get_input_shape(config['dataset_to_run'])
+        print('Input SHAPE from model_search = ',self.input_shape)
+        self.grayscale = utils.get_grayscale(config['dataset_to_run'])
 
     def intialize_model(self, arch_ops, arch_kernel):
         model = NetworkMixArch(self.channels, self.CLASSES, self.layers,
