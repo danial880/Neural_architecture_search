@@ -74,7 +74,7 @@ datasets:
     std: [0.24703233, 0.24348505, 0.26158768]
     train: ["datasets.CIFAR10(root=cfg['paths']['data_dir'], train=True,
                               download=True, transform=train_transform)"]
-    test: ["datasets.CIFAR10(root=cfgi['paths']['data_dir'], train=False,
+    test: ["datasets.CIFAR10(root=cfg['paths']['data_dir'], train=False,
                              download=True, transform=test_transform)"]
     classes: ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog',
               'horse', 'ship', 'truck']

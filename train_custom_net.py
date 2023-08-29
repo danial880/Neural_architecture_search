@@ -6,7 +6,6 @@ import torch
 import utils
 import random
 import logging
-import argparse
 import numpy as np
 import torch.backends.cudnn as cudnn
 from time import strftime
